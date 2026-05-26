@@ -1,0 +1,40 @@
+# ── Secrets & credentials ─────────────────────────────────────────────────────
+.env
+*.jks
+*.cer
+norton-root.cer
+
+# ── Proprietary LSEG JARs (customers supply their own licensed copies) ────────
+java-plugin/dist/message-feed-*.jar
+java-plugin/dist/message-feed-handler-*.jar
+java-plugin/dist/plugins/message-feed-plugin-example-all.jar
+
+# ── Proprietary LSEG documentation ──────────────────────────────────────────
+java-plugin/dist/*.pdf
+
+# ── Java build / runtime artifacts ───────────────────────────────────────────
+java-plugin/dist/logs/
+java-plugin/build-tmp/
+java-plugin/build/
+*.class
+
+# ── Node ──────────────────────────────────────────────────────────────────────
+node_modules/
+backend/node_modules/
+frontend/node_modules/
+npm-debug.log*
+yarn-error.log
+.pnp
+.pnp.js
+*.log
+
+# ── Frontend build output ─────────────────────────────────────────────────────
+frontend/dist/
+
+# ── OS / editor ───────────────────────────────────────────────────────────────
+.DS_Store
+Thumbs.db
+.vscode/
+*.swp
+*.swo
+*~

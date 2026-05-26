@@ -1,0 +1,30 @@
+# ── Secrets ───────────────────────────────────────────────────────────────────
+.env
+*.jks
+*.cer
+norton-root.cer
+
+# ── Proprietary LSEG JARs (downloaded at runtime by start.sh) ─────────────────
+java-plugin/dist/message-feed-*.jar
+java-plugin/dist/message-feed-handler-*.jar
+java-plugin/dist/plugins/message-feed-plugin-example-all.jar
+java-plugin/dist/logs/
+
+# ── Java build artifacts ──────────────────────────────────────────────────────
+java-plugin/build/
+java-plugin/build-tmp/
+
+# ── Node dependencies & build cache ───────────────────────────────────────────
+node_modules/
+backend/node_modules/
+frontend/node_modules/
+
+# ── Git / CI ──────────────────────────────────────────────────────────────────
+.git/
+.github/
+*.log
+
+# ── OS / editor ───────────────────────────────────────────────────────────────
+.DS_Store
+Thumbs.db
+.vscode/

@@ -1,0 +1,48 @@
+version: '3.9'
+
+services:
+
+  # ── Node.js backend ──────────────────────────────────────────────────────────
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: lseg-feed-backend
+    restart: unless-stopped
+    environment:
+      PORT:             "3001"
+      JWT_SECRET:       "${JWT_SECRET}"        # set in .env
+      ADMIN_PASSWORD:   "${ADMIN_PASSWORD}"    # set in .env
+      FRONTEND_ORIGIN:  "${FRONTEND_ORIGIN:-*}"
+      MSG_FEED_JAR:     "/app/java-dist/message-feed-0.0.42.0.jar"
+      PLUGIN_DIR:       "/app/java-dist/plugins"
+      JAVA_BIN:         "java"
+      MAX_MESSAGES:     "500"
+    volumes:
+      # Mount the Java feed application + our custom plugin
+      - ./java-plugin/dist:/app/java-dist:ro
+    ports:
+      - "3001:3001"
+    networks:
+      - lseg-net
+
+  # ── Nginx (serves React build + proxies API/WS) ───────────────────────────
+  nginx:
+    image: nginx:1.25-alpine
+    container_name: lseg-feed-nginx
+    restart: unless-stopped
+    depends_on:
+      - backend
+    volumes:
+      - ./frontend/dist:/usr/share/nginx/html:ro
+      - ./nginx/nginx.conf:/etc/nginx/conf.d/default.conf:ro
+    ports:
+      - "80:80"
+      # Uncomment for TLS (also add nginx SSL config):
+      # - "443:443"
+    networks:
+      - lseg-net
+
+networks:
+  lseg-net:
+    driver: bridge

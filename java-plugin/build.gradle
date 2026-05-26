@@ -1,0 +1,50 @@
+plugins {
+    id 'java'
+    id 'com.github.johnrengelman.shadow' version '8.1.1'
+}
+
+group   = 'com.lseg.msgfeed'
+version = '1.0.0'
+
+java {
+    sourceCompatibility = JavaVersion.VERSION_17
+    targetCompatibility = JavaVersion.VERSION_17
+}
+
+repositories {
+    mavenCentral()
+    // If message-feed-handler.jar is not on Maven Central, add it as a local
+    // file dependency below.
+}
+
+dependencies {
+    // LSEG handler interface – place message-feed-handler-x.x.x.jar in libs/
+    compileOnly fileTree(dir: 'libs', include: ['message-feed-handler-*.jar'])
+
+    // Jackson for JSON serialisation (must be bundled in the fat jar)
+    implementation 'com.fasterxml.jackson.core:jackson-databind:2.16.1'
+}
+
+// ── Fat jar via Shadow plugin ─────────────────────────────────────────────────
+shadowJar {
+    archiveBaseName    = 'lseg-websocket-plugin'
+    archiveClassifier  = ''
+    archiveVersion     = project.version
+
+    // Exclude handler jar classes – they are provided by message-feed-app at runtime
+    dependencies {
+        exclude(dependency('com.fasterxml.jackson.core:jackson-annotations'))
+    }
+
+    mergeServiceFiles()
+}
+
+// Make `gradle build` produce the fat jar
+build.dependsOn shadowJar
+
+// Copy fat jar to dist/plugins so Node.js can find it
+task copyPlugin(type: Copy, dependsOn: shadowJar) {
+    from shadowJar.archiveFile
+    into "${rootDir}/../dist/plugins"
+    doFirst { mkdir "${rootDir}/../dist/plugins" }
+}
