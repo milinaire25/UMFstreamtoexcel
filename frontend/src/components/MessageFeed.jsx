@@ -5,7 +5,7 @@ const TABS = ['feed', 'json', 'logs', 'command'];
 const STATUS_STYLE = {
   running:    { color: 'var(--green)',  bg: 'var(--green-bg)',  label: 'Running' },
   connecting: { color: 'var(--amber)',  bg: 'var(--amber-bg)',  label: 'Connecting…' },
-  stopped:    { color: 'var(--text-3)', bg: 'rgba(255,255,255,0.04)', label: 'Stopped' },
+  stopped:    { color: 'var(--text-3)', bg: 'var(--surface-2)',       label: 'Stopped' },
   error:      { color: 'var(--red)',    bg: 'var(--red-bg)',    label: 'Error' },
 };
 
@@ -305,9 +305,9 @@ function CopyBlock({ code }) {
       </pre>
       <button onClick={copy} style={{
         position: 'absolute', top: 10, right: 10,
-        background: copied ? 'rgba(34,197,94,0.15)' : 'rgba(255,255,255,0.06)',
+        background: copied ? 'var(--green-bg)' : 'var(--surface-3)',
         color: copied ? 'var(--green)' : 'var(--text-2)',
-        border: `1px solid ${copied ? 'rgba(34,197,94,0.3)' : 'var(--border-strong)'}`,
+        border: `1px solid ${copied ? 'var(--green-border)' : 'var(--border-strong)'}`,
         borderRadius: 6, padding: '3px 10px', fontSize: 11, cursor: 'pointer',
       }}>
         {copied ? '✓ Copied' : 'Copy'}
