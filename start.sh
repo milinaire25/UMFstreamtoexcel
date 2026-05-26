@@ -12,7 +12,6 @@
 #
 # Optional:
 #   TRUST_STORE_URL        — HTTPS URL to lseg-truststore.jks
-#                            (skip if you rely on Java's default cacerts)
 # ═══════════════════════════════════════════════════════════════════════════════
 set -e
 
@@ -21,13 +20,36 @@ PLUGIN_DIR=/app/java-plugin/dist/plugins
 
 mkdir -p "$JAR_DIR" "$PLUGIN_DIR"
 
+# ── Helper: download a file, handling Google Drive virus-scan bypass ───────────
+# Google Drive blocks direct JAR downloads via curl with a virus scan warning.
+# Switching to drive.usercontent.google.com bypasses this for programmatic use.
+fetch_file() {
+  local url="$1"
+  local dest="$2"
+
+  # Convert drive.google.com share/uc URLs → drive.usercontent.google.com
+  if echo "$url" | grep -q "drive\.google\.com"; then
+    # Extract the file ID from either format:
+    #   https://drive.google.com/uc?export=download&id=FILE_ID
+    #   https://drive.google.com/file/d/FILE_ID/view
+    FILE_ID=$(echo "$url" | grep -oE 'id=([^&]+)' | cut -d= -f2)
+    if [ -z "$FILE_ID" ]; then
+      FILE_ID=$(echo "$url" | grep -oE '/d/([^/]+)' | cut -d/ -f3)
+    fi
+    url="https://drive.usercontent.google.com/download?id=${FILE_ID}&export=download&confirm=t&authuser=0"
+    echo "[startup] Converted to direct Google Drive download URL (id=${FILE_ID})"
+  fi
+
+  curl -fsSL "$url" -o "$dest"
+}
+
 # ── Download production JAR ────────────────────────────────────────────────────
 if [ -n "$MSG_FEED_JAR_URL_PROD" ]; then
   DEST="$JAR_DIR/message-feed-prod.jar"
   if [ ! -f "$DEST" ]; then
     echo "[startup] Downloading production JAR..."
-    curl -fsSL "$MSG_FEED_JAR_URL_PROD" -o "$DEST"
-    echo "[startup] Production JAR downloaded → $DEST"
+    fetch_file "$MSG_FEED_JAR_URL_PROD" "$DEST"
+    echo "[startup] Production JAR downloaded ($(du -h $DEST | cut -f1))"
   else
     echo "[startup] Production JAR already present — skipping download"
   fi
@@ -39,8 +61,8 @@ if [ -n "$MSG_FEED_JAR_URL_PPE" ]; then
   DEST="$JAR_DIR/message-feed-ppe.jar"
   if [ ! -f "$DEST" ]; then
     echo "[startup] Downloading PPE/beta JAR..."
-    curl -fsSL "$MSG_FEED_JAR_URL_PPE" -o "$DEST"
-    echo "[startup] PPE JAR downloaded → $DEST"
+    fetch_file "$MSG_FEED_JAR_URL_PPE" "$DEST"
+    echo "[startup] PPE JAR downloaded ($(du -h $DEST | cut -f1))"
   else
     echo "[startup] PPE JAR already present — skipping download"
   fi
@@ -52,23 +74,20 @@ if [ -n "$TRUST_STORE_URL" ]; then
   DEST="$JAR_DIR/lseg-truststore.jks"
   if [ ! -f "$DEST" ]; then
     echo "[startup] Downloading LSEG truststore..."
-    curl -fsSL "$TRUST_STORE_URL" -o "$DEST"
-    echo "[startup] Truststore downloaded → $DEST"
+    fetch_file "$TRUST_STORE_URL" "$DEST"
   fi
   export TRUST_STORE="$DEST"
 fi
 
-# ── Validate: at least the prod JAR must be present ───────────────────────────
+# ── Validate ──────────────────────────────────────────────────────────────────
 if [ -z "$MSG_FEED_JAR_PROD" ] && [ ! -f "$JAR_DIR/message-feed-prod.jar" ]; then
   echo ""
   echo "╔══════════════════════════════════════════════════════════════════════╗"
-  echo "║  ERROR: No production JAR available.                                ║"
+  echo "║  WARNING: No production JAR available.                              ║"
   echo "║  Set MSG_FEED_JAR_URL_PROD to a signed download URL for:            ║"
   echo "║    message-feed-<version>.jar   (from your LSEG download package)  ║"
   echo "╚══════════════════════════════════════════════════════════════════════╝"
   echo ""
-  # Start anyway so the web UI is reachable — users will see an error when
-  # they try to start a session, which is friendlier than a crash loop.
 fi
 
 echo "[startup] Starting LSEG Messenger Feed backend on port ${PORT:-3001}..."
