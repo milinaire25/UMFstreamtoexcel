@@ -1,0 +1,81 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>StreamtoExcel - LSEGMSGFEED</title>
+    <script src="https://appsforoffice.microsoft.com/lib/1/hosted/office.js"></script>
+  </head>
+  <body>
+    <main class="shell">
+      <section class="panel">
+        <div class="brand">
+          <div class="mark">SE</div>
+          <div>
+            <h1>StreamtoExcel</h1>
+            <p>LSEG UMF WebSocket feed</p>
+          </div>
+        </div>
+
+        <form id="connect-form" class="stack">
+          <label>
+            Backend URL
+            <input id="backend-url" type="url" value="http://localhost:3001" required />
+          </label>
+
+          <label>
+            WebSocket URL
+            <input id="ws-url" type="url" value="ws://localhost:3001/ws" required />
+          </label>
+
+          <div class="grid">
+            <label>
+              Username
+              <input id="username" autocomplete="username" value="admin" required />
+            </label>
+            <label>
+              Password
+              <input id="password" type="password" autocomplete="current-password" required />
+            </label>
+          </div>
+
+          <div class="actions">
+            <button id="login-button" type="button">Login & load sessions</button>
+          </div>
+
+          <label>
+            Session
+            <select id="session-select" disabled>
+              <option value="">Login to load sessions</option>
+            </select>
+          </label>
+
+          <div class="actions">
+            <button id="connect-button" type="submit" disabled>Connect feed</button>
+            <button id="disconnect-button" type="button" disabled>Disconnect</button>
+            <button id="clear-button" type="button">Clear sheet</button>
+          </div>
+        </form>
+      </section>
+
+      <section class="panel status-panel">
+        <div class="status-row">
+          <span id="status-dot" class="dot idle"></span>
+          <span id="status-text">Not connected</span>
+        </div>
+        <div class="metric-row">
+          <div>
+            <span id="message-count">0</span>
+            <small>messages written</small>
+          </div>
+          <div>
+            <span id="last-received">--</span>
+            <small>last received</small>
+          </div>
+        </div>
+        <pre id="log" aria-live="polite"></pre>
+      </section>
+    </main>
+    <script type="module" src="/src/main.js"></script>
+  </body>
+</html>

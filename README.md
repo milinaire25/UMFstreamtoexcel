@@ -1,8 +1,11 @@
-# LSEG Messenger Feed
+# StreamtoExcel - LSEGMSGFEED
 
 A full-stack web application that lets multiple users log in, add their LSEG
 Service Account credentials, and see real-time messages from LSEG Messenger
 streamed to their browser via WebSocket.
+
+This fork also includes the **StreamtoExcel** Excel add-in for writing live UMF
+WebSocket messages into a worksheet with the latest message first.
 
 ---
 
@@ -117,6 +120,74 @@ docker-compose logs -f backend
 ```
 
 The app is available at **http://localhost** (port 80).
+
+---
+
+## StreamtoExcel Excel add-in
+
+The Excel add-in is a frontend-only Office task pane in `excel-addin/`. It does
+not add or change backend routes. It uses the same contract as the React
+dashboard:
+
+1. `POST /api/auth/login` to get a JWT.
+2. `GET /api/sessions` to choose an existing feed session.
+3. Connect to `ws://localhost:3001/ws`.
+4. Send `{ "type": "auth", "token": "...", "sessionId": "..." }` as the first
+   WebSocket message.
+5. Write each `{ "type": "message", "data": ... }` payload to Excel.
+
+Incoming messages are written to the `UMF Feed` worksheet in the
+`UMFFeedMessages` table. Each message gets its own row, and new rows are
+inserted at the top of the table so the latest message appears first.
+
+### Run the add-in locally
+
+Start the existing backend and frontend as usual:
+
+```bash
+cd backend
+npm install
+node server.js
+```
+
+```bash
+cd frontend
+npm install
+npm run dev
+```
+
+Start the Excel add-in task pane:
+
+```bash
+cd excel-addin
+npm install
+npm run dev
+# task pane URL: http://localhost:5174/index.html
+```
+
+### Sideload in Excel
+
+1. In Excel, open **Insert → Add-ins → My Add-ins → Upload My Add-in**.
+2. Select `excel-addin/manifest.xml`.
+3. Open the **StreamtoExcel** task pane from the Home ribbon.
+4. Enter:
+   - Backend URL: `http://localhost:3001`
+   - WebSocket URL: `ws://localhost:3001/ws`
+   - The same username/password used in the dashboard
+5. Click **Login & load sessions**.
+6. Pick a session, make sure it is started in the dashboard, then click
+   **Connect feed**.
+
+> For hosted deployments, update `excel-addin/manifest.xml` so the task pane,
+> icon, backend, and WebSocket URLs use your deployed HTTPS/WSS origins.
+
+### Add-in checks
+
+```bash
+cd excel-addin
+npm test
+npm run build
+```
 
 ---
 

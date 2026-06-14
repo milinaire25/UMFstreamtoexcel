@@ -30,6 +30,7 @@ yarn-error.log
 
 # ── Frontend build output ─────────────────────────────────────────────────────
 frontend/dist/
+excel-addin/dist/
 
 # ── OS / editor ───────────────────────────────────────────────────────────────
 .DS_Store
