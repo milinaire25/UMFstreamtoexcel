@@ -25,7 +25,27 @@ const server = http.createServer(app);
 const wss    = new WebSocket.Server({ server, path: '/ws' });
 
 app.use(helmet({ contentSecurityPolicy: false }));
-app.use(cors({ origin: process.env.FRONTEND_ORIGIN || '*' }));
+const configuredOrigins = (process.env.FRONTEND_ORIGIN || '')
+  .split(',')
+  .map(origin => origin.trim())
+  .filter(Boolean);
+const allowedOrigins = new Set([
+  ...configuredOrigins,
+  'http://localhost:5173',
+  'http://127.0.0.1:5173',
+  'http://localhost:5174',
+  'http://127.0.0.1:5174',
+]);
+
+app.use(cors({
+  origin(origin, callback) {
+    if (!origin || allowedOrigins.has(origin)) return callback(null, true);
+    if (process.env.NODE_ENV !== 'production' && configuredOrigins.length === 0) {
+      return callback(null, true);
+    }
+    return callback(new Error(`CORS blocked origin: ${origin}`));
+  },
+}));
 app.use(express.json());
 
 // Rate limiting

@@ -8,22 +8,22 @@
   <Version>1.0.0.0</Version>
   <ProviderName>StreamtoExcel</ProviderName>
   <DefaultLocale>en-US</DefaultLocale>
-  <DisplayName DefaultValue="StreamtoExcel - LSEGMSGFEED"/>
-  <Description DefaultValue="Connect Excel to the LSEG UMF WebSocket feed and write live messages to rows."/>
-  <IconUrl DefaultValue="http://localhost:5174/assets/icon-32.png"/>
-  <HighResolutionIconUrl DefaultValue="http://localhost:5174/assets/icon-64.png"/>
-  <SupportUrl DefaultValue="https://github.com/milinaire25/LSEGMSGFEED"/>
+  <DisplayName DefaultValue="StreamtoExcel"/>
+  <Description DefaultValue="Connect Excel to a UMF WebSocket feed and write live messages to rows."/>
+  <IconUrl DefaultValue="http://127.0.0.1:5174/assets/icon-32.png"/>
+  <HighResolutionIconUrl DefaultValue="http://127.0.0.1:5174/assets/icon-64.png"/>
+  <SupportUrl DefaultValue="https://github.com/milinaire25/UMFstreamtoexcel"/>
   <AppDomains>
-    <AppDomain>http://localhost:5174</AppDomain>
-    <AppDomain>https://localhost:5174</AppDomain>
-    <AppDomain>http://localhost:3001</AppDomain>
-    <AppDomain>https://localhost:3001</AppDomain>
+    <AppDomain>http://127.0.0.1:5174</AppDomain>
+    <AppDomain>https://127.0.0.1:5174</AppDomain>
+    <AppDomain>http://127.0.0.1:3001</AppDomain>
+    <AppDomain>https://127.0.0.1:3001</AppDomain>
   </AppDomains>
   <Hosts>
     <Host Name="Workbook"/>
   </Hosts>
   <DefaultSettings>
-    <SourceLocation DefaultValue="http://localhost:5174/index.html"/>
+    <SourceLocation DefaultValue="http://127.0.0.1:5174/index.html"/>
   </DefaultSettings>
   <Permissions>ReadWriteDocument</Permissions>
   <VersionOverrides xmlns="http://schemas.microsoft.com/office/taskpaneappversionoverrides" xsi:type="VersionOverridesV1_0">
@@ -69,13 +69,13 @@
     </Hosts>
     <Resources>
       <bt:Images>
-        <bt:Image id="Icon.16x16" DefaultValue="http://localhost:5174/assets/icon-16.png"/>
-        <bt:Image id="Icon.32x32" DefaultValue="http://localhost:5174/assets/icon-32.png"/>
-        <bt:Image id="Icon.80x80" DefaultValue="http://localhost:5174/assets/icon-80.png"/>
+        <bt:Image id="Icon.16x16" DefaultValue="http://127.0.0.1:5174/assets/icon-16.png"/>
+        <bt:Image id="Icon.32x32" DefaultValue="http://127.0.0.1:5174/assets/icon-32.png"/>
+        <bt:Image id="Icon.80x80" DefaultValue="http://127.0.0.1:5174/assets/icon-80.png"/>
       </bt:Images>
       <bt:Urls>
-        <bt:Url id="Taskpane.Url" DefaultValue="http://localhost:5174/index.html"/>
-        <bt:Url id="GetStarted.LearnMoreUrl" DefaultValue="https://github.com/milinaire25/LSEGMSGFEED"/>
+        <bt:Url id="Taskpane.Url" DefaultValue="http://127.0.0.1:5174/index.html"/>
+        <bt:Url id="GetStarted.LearnMoreUrl" DefaultValue="https://github.com/milinaire25/UMFstreamtoexcel"/>
       </bt:Urls>
       <bt:ShortStrings>
         <bt:String id="GetStarted.Title" DefaultValue="StreamtoExcel is ready"/>
@@ -83,8 +83,8 @@
         <bt:String id="TaskpaneButton.Label" DefaultValue="Open feed"/>
       </bt:ShortStrings>
       <bt:LongStrings>
-        <bt:String id="GetStarted.Description" DefaultValue="Open the task pane, login to LSEGMSGFEED, choose a session, and connect the WebSocket feed."/>
-        <bt:String id="TaskpaneButton.Tooltip" DefaultValue="Connect Excel to a live LSEG UMF WebSocket session."/>
+        <bt:String id="GetStarted.Description" DefaultValue="Open the task pane, login, choose a session, and connect the WebSocket feed."/>
+        <bt:String id="TaskpaneButton.Tooltip" DefaultValue="Connect Excel to a live UMF WebSocket session."/>
       </bt:LongStrings>
     </Resources>
   </VersionOverrides>
