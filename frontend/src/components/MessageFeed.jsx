@@ -49,7 +49,7 @@ export default function MessageFeed({ session, messages, logs, errorMsg, onStart
   -Dloglevel=INFO
 
 # Note: -Djavax.net.ssl.trustStore is only added when a custom
-# lseg-truststore.jks is present (not needed on cloud deployments).`;
+# truststore file is present (not needed on cloud deployments).`;
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: 12, flex: 1, animation: 'fadeIn 0.2s ease' }}>
@@ -154,7 +154,7 @@ export default function MessageFeed({ session, messages, logs, errorMsg, onStart
             <div style={{ fontSize: 12, color: 'var(--text-2)', lineHeight: 1.6 }}>
               {errorMsg}
               {isCooldown && (
-                <span> — LSEG locks the session for 15 minutes after an abrupt disconnect.{' '}
+                <span> — the upstream service can lock the session for 15 minutes after an abrupt disconnect.{' '}
                   <strong style={{ color: 'var(--text-1)' }}>Do not click Start again</strong> until the timer expires.
                 </span>
               )}
@@ -274,7 +274,7 @@ export default function MessageFeed({ session, messages, logs, errorMsg, onStart
               <div style={{ marginTop: 16, padding: '12px 14px', background: 'var(--surface-2)', borderRadius: 'var(--r)', border: '1px solid var(--border)', fontSize: 12, color: 'var(--text-2)', lineHeight: 1.7 }}>
                 <strong style={{ color: 'var(--text-1)' }}>WebSocketPlugin</strong> implements{' '}
                 <code style={{ background: 'var(--surface-3)', padding: '1px 5px', borderRadius: 4 }}>ChatroomMessageHandler</code>{' '}
-                from the LSEG SDK and writes each received message as a single JSON line to stdout.
+                from the message-feed SDK and writes each received message as a single JSON line to stdout.
                 Node.js captures that stream and fans out to all connected browser WebSocket clients.
               </div>
             </div>
@@ -390,7 +390,7 @@ function EmptyFeed({ status }) {
         <div style={{ fontSize: 36, marginBottom: 16,
           display: 'inline-block', animation: 'spin 2s linear infinite' }}>⚙️</div>
         <div style={{ fontSize: 14, fontWeight: 600, color: 'var(--text-2)', marginBottom: 6 }}>
-          Connecting to LSEG Messenger…
+          Connecting to message feed…
         </div>
         <div style={{ fontSize: 12, color: 'var(--text-3)' }}>
           Authenticating service account and attaching channels.

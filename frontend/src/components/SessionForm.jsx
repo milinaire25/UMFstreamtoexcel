@@ -97,7 +97,7 @@ export default function SessionForm({ onSubmit, onClose }) {
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 22 }}>
           <div>
             <h2 style={{ fontSize: 15, fontWeight: 600, color: 'var(--text-1)' }}>New session</h2>
-            <p style={{ fontSize: 12, color: 'var(--text-3)', marginTop: 3 }}>Enter your LSEG Service Account credentials</p>
+            <p style={{ fontSize: 12, color: 'var(--text-3)', marginTop: 3 }}>Enter your service account credentials</p>
           </div>
           <button onClick={onClose} style={{
             border: 'none', background: 'var(--surface-2)', color: 'var(--text-2)',

@@ -30,7 +30,7 @@ export default function Topbar({ user, onLogout, isAdmin }) {
             StreamtoExcel
           </div>
           <div style={{ fontSize: 10, color: 'var(--accent)', fontWeight: 800, letterSpacing: 0 }}>
-            LSEG UMF WebSocket bridge
+            UMF WebSocket bridge
           </div>
         </div>
       </div>

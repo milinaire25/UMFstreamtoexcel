@@ -179,7 +179,7 @@ function EmptyState({ onAdd, loading }) {
           No session selected
         </h2>
         <p style={{ fontSize: 13, color: 'var(--text-3)', maxWidth: 340, lineHeight: 1.7 }}>
-          Add a session with your LSEG Service Account credentials to start monitoring messages in real time.
+          Add a session with your service account credentials to start monitoring messages in real time.
         </p>
       </div>
 

@@ -59,13 +59,13 @@ function LoginForm() {
         <BrandMark />
         <div>
           <h1>StreamtoExcel</h1>
-          <p>LSEG UMF WebSocket feed to Excel</p>
+          <p>UMF WebSocket feed to Excel</p>
         </div>
       </div>
 
       <div className="security-strip">
         <ShieldCheck size={16} />
-        <span>JWT-secured dashboard access. LSEG service passwords stay server-side only.</span>
+        <span>JWT-secured dashboard access. Service passwords stay server-side only.</span>
       </div>
 
       <label className="field">
@@ -119,7 +119,7 @@ function ExcelPreview() {
       <div className="stream-line">
         <div className="stream-node source">
           <RadioTower size={18} />
-          <span>LSEG UMF</span>
+          <span>UMF Feed</span>
         </div>
         <div className="stream-pulse" />
         <div className="stream-node target">
@@ -193,7 +193,7 @@ export default function LoginPage() {
           </nav>
 
           <div className="copy-block">
-            <h2>Stream LSEG Messenger feed data straight into Excel.</h2>
+            <h2>Stream message feed data straight into Excel.</h2>
             <p>
               Monitor UMF WebSocket sessions, inspect raw messages, and fill a workbook with
               live bond bid/ask rows as new events arrive.
