@@ -1,6 +1,6 @@
 # ═══════════════════════════════════════════════════════════════════════════════
 # render.yaml — Render Blueprint
-# One-click deployment of the LSEG Messenger Feed to Render.com
+# One-click deployment of StreamtoExcel - LSEGMSGFEED to Render.com
 #
 # Usage:
 #   1. Fork this repo to your GitHub account
@@ -12,7 +12,7 @@
 
 services:
   - type: web
-    name: lseg-messenger-feed
+    name: umfstreamtoexcel
     runtime: docker
     dockerfilePath: ./Dockerfile
     plan: free          # change to "starter" ($7/mo) for always-on uptime
@@ -60,7 +60,7 @@ services:
       # Render injects the service URL as RENDER_EXTERNAL_URL automatically.
       - key: FRONTEND_ORIGIN
         fromService:
-          name: lseg-messenger-feed
+          name: umfstreamtoexcel
           type: web
           property: host
 
@@ -71,4 +71,4 @@ services:
         value: java
 
     healthCheckPath: /api/health
-    autoDeploy: false   # set to true if you want auto-deploy on every git push
+    autoDeploy: true

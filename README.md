@@ -11,7 +11,7 @@ WebSocket messages into a worksheet with the latest message first.
 
 ## ⚡ One-click deploy to Render
 
-[![Deploy to Render](https://render.com/images/deploy-to-render-button.svg)](https://render.com/deploy?repo=https://github.com/milinaire25/LSEGMSGFEED)
+[![Deploy to Render](https://render.com/images/deploy-to-render-button.svg)](https://render.com/deploy?repo=https://github.com/milinaire25/UMFstreamtoexcel)
 
 > **Before clicking:** you must host your LSEG JAR files at an HTTPS URL.
 > See [Cloud deployment (Render)](#cloud-deployment-render) below.
@@ -207,10 +207,10 @@ The JARs are **not** in this repo. You need to make them downloadable:
 
 You'll need one URL for the production JAR and optionally one for the PPE/beta JAR.
 
-### Step 2 — Fork this repo
+### Step 2 — Use this repo
 
-Fork **[milinaire25/LSEGMSGFEED](https://github.com/milinaire25/LSEGMSGFEED)** to your
-own GitHub account (keeps your config private).
+Deploy from **[milinaire25/UMFstreamtoexcel](https://github.com/milinaire25/UMFstreamtoexcel)**.
+For private deployments, fork it to your own GitHub account first.
 
 ### Step 3 — Deploy to Render
 
