@@ -1,6 +1,12 @@
 import assert from 'node:assert/strict';
 import test from 'node:test';
-import { messageToRow, normalizeUrlInput, socketUrlFromBackend } from '../src/message.js';
+import {
+  messageToRow,
+  normalizeBackendUrl,
+  normalizeUrlInput,
+  normalizeWebSocketUrl,
+  socketUrlFromBackend,
+} from '../src/message.js';
 
 test('messageToRow flattens UMF event messages into one Excel row', () => {
   const row = messageToRow({
@@ -37,6 +43,20 @@ test('normalizeUrlInput keeps the last valid URL when Excel appends typed text',
   );
   assert.equal(
     normalizeUrlInput('ws://localhost:3001/wswss://umfstreamtoexcel.onrender.com/ws'),
+    'wss://umfstreamtoexcel.onrender.com/ws',
+  );
+});
+
+test('normalizeBackendUrl keeps the local Render proxy stable', () => {
+  assert.equal(
+    normalizeBackendUrl('http://127.0.0.1:5174/http://localhost:5174/renderrender'),
+    'http://localhost:5174/render',
+  );
+});
+
+test('normalizeWebSocketUrl keeps the backend WebSocket path stable', () => {
+  assert.equal(
+    normalizeWebSocketUrl('ws://127.0.0.1:5174/wwss://umfstreamtoexcel.onrender.com/wss'),
     'wss://umfstreamtoexcel.onrender.com/ws',
   );
 });

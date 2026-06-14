@@ -38,6 +38,26 @@ export function socketUrlFromBackend(backendUrl) {
   return url.toString();
 }
 
+export function normalizeBackendUrl(value) {
+  const url = new URL(normalizeUrlInput(value));
+  if ((url.hostname === 'localhost' || url.hostname === '127.0.0.1') && url.port === '5174') {
+    url.pathname = '/render';
+    url.search = '';
+    url.hash = '';
+  }
+  return url.toString().replace(/\/$/, '');
+}
+
+export function normalizeWebSocketUrl(value) {
+  const url = new URL(normalizeUrlInput(value));
+  if (url.protocol === 'http:') url.protocol = 'ws:';
+  if (url.protocol === 'https:') url.protocol = 'wss:';
+  url.pathname = '/ws';
+  url.search = '';
+  url.hash = '';
+  return url.toString();
+}
+
 export function normalizeUrlInput(value) {
   const text = String(value || '').trim();
   const matches = [...text.matchAll(/(?:https?|wss?):\/\//gi)];
