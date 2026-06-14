@@ -1,5 +1,5 @@
 import './styles.css';
-import { HEADERS, SHEET_NAME, TABLE_NAME, messageToRow, socketUrlFromBackend } from './message.js';
+import { HEADERS, SHEET_NAME, TABLE_NAME, messageToRow, normalizeUrlInput, socketUrlFromBackend } from './message.js';
 
 const state = {
   token: '',
@@ -35,6 +35,7 @@ Office.onReady(() => {
 
 els.backendUrl.addEventListener('change', () => {
   try {
+    els.backendUrl.value = normalizeUrlInput(els.backendUrl.value);
     els.wsUrl.value = socketUrlFromBackend(els.backendUrl.value);
   } catch {
     // Leave the explicit websocket URL untouched while the user edits.
@@ -104,6 +105,7 @@ function connectFeed() {
   }
 
   disconnectFeed();
+  els.wsUrl.value = normalizeUrlInput(els.wsUrl.value);
   state.socket = new WebSocket(els.wsUrl.value);
   setStatus('connecting', 'Opening WebSocket...');
 
@@ -236,6 +238,7 @@ async function apiRequest(path, options) {
   const headers = { 'Content-Type': 'application/json' };
   if (state.token) headers.Authorization = `Bearer ${state.token}`;
 
+  els.backendUrl.value = normalizeUrlInput(els.backendUrl.value);
   const response = await fetch(`${els.backendUrl.value.replace(/\/$/, '')}${path}`, {
     method: options.method,
     headers,

@@ -30,10 +30,17 @@ export function messageToRow(message, receivedAt = new Date().toISOString()) {
 }
 
 export function socketUrlFromBackend(backendUrl) {
-  const url = new URL(backendUrl);
+  const url = new URL(normalizeUrlInput(backendUrl));
   url.protocol = url.protocol === 'https:' ? 'wss:' : 'ws:';
   url.pathname = '/ws';
   url.search = '';
   url.hash = '';
   return url.toString();
+}
+
+export function normalizeUrlInput(value) {
+  const text = String(value || '').trim();
+  const matches = [...text.matchAll(/(?:https?|wss?):\/\//gi)];
+  const lastScheme = matches.at(-1);
+  return lastScheme ? text.slice(lastScheme.index).trim() : text;
 }

@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict';
 import test from 'node:test';
-import { messageToRow, socketUrlFromBackend } from '../src/message.js';
+import { messageToRow, normalizeUrlInput, socketUrlFromBackend } from '../src/message.js';
 
 test('messageToRow flattens UMF event messages into one Excel row', () => {
   const row = messageToRow({
@@ -28,4 +28,15 @@ test('messageToRow flattens UMF event messages into one Excel row', () => {
 test('socketUrlFromBackend derives the existing backend WebSocket endpoint', () => {
   assert.equal(socketUrlFromBackend('http://localhost:3001'), 'ws://localhost:3001/ws');
   assert.equal(socketUrlFromBackend('https://feed.example.com/app'), 'wss://feed.example.com/ws');
+});
+
+test('normalizeUrlInput keeps the last valid URL when Excel appends typed text', () => {
+  assert.equal(
+    normalizeUrlInput('http://localhost:3001https://umfstreamtoexcel.onrender.com'),
+    'https://umfstreamtoexcel.onrender.com',
+  );
+  assert.equal(
+    normalizeUrlInput('ws://localhost:3001/wswss://umfstreamtoexcel.onrender.com/ws'),
+    'wss://umfstreamtoexcel.onrender.com/ws',
+  );
 });
