@@ -25,10 +25,19 @@ const server = http.createServer(app);
 const wss    = new WebSocket.Server({ server, path: '/ws' });
 
 app.use(helmet({ contentSecurityPolicy: false }));
-const configuredOrigins = (process.env.FRONTEND_ORIGIN || '')
-  .split(',')
+const configuredOrigins = [
+  process.env.FRONTEND_ORIGIN,
+  process.env.RENDER_EXTERNAL_URL,
+  'https://umfstreamtoexcel.onrender.com',
+]
+  .filter(Boolean)
+  .flatMap(value => value.split(','))
   .map(origin => origin.trim())
-  .filter(Boolean);
+  .filter(Boolean)
+  .flatMap(origin => {
+    if (/^https?:\/\//i.test(origin)) return [origin];
+    return [`https://${origin}`, `http://${origin}`];
+  });
 const allowedOrigins = new Set([
   ...configuredOrigins,
   'http://localhost:5173',
@@ -37,10 +46,15 @@ const allowedOrigins = new Set([
   'http://127.0.0.1:5174',
 ]);
 
+const configuredOriginInputs = (process.env.FRONTEND_ORIGIN || '')
+  .split(',')
+  .map(origin => origin.trim())
+  .filter(Boolean);
+
 app.use(cors({
   origin(origin, callback) {
     if (!origin || allowedOrigins.has(origin)) return callback(null, true);
-    if (process.env.NODE_ENV !== 'production' && configuredOrigins.length === 0) {
+    if (process.env.NODE_ENV !== 'production' && configuredOriginInputs.length === 0) {
       return callback(null, true);
     }
     return callback(new Error(`CORS blocked origin: ${origin}`));
