@@ -73,6 +73,12 @@ app.use('/api/sessions', verifyToken, sessionRouter);
 // Health check
 app.get('/api/health', (_req, res) => res.json({ status: 'ok', ts: new Date() }));
 
+// Serve hosted Excel add-in task pane and manifest before the React catch-all.
+const excelAddinDistPath = path.join(__dirname, '../excel-addin/dist');
+if (fs.existsSync(excelAddinDistPath)) {
+  app.use('/excel-addin', express.static(excelAddinDistPath));
+}
+
 // Serve React frontend in production
 const distPath = path.join(__dirname, '../frontend/dist');
 if (fs.existsSync(distPath)) {

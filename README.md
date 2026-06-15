@@ -165,7 +165,7 @@ npm run dev
 # task pane URL: http://localhost:5174/index.html
 ```
 
-### Sideload in Excel
+### Sideload locally in Excel
 
 1. In Excel, open **Insert → Add-ins → My Add-ins → Upload My Add-in**.
 2. Select `excel-addin/manifest.xml`.
@@ -178,8 +178,26 @@ npm run dev
 6. Pick a session, make sure it is started in the dashboard, then click
    **Connect feed**.
 
-> For hosted deployments, update `excel-addin/manifest.xml` so the task pane,
-> icon, backend, and WebSocket URLs use your deployed HTTPS/WSS origins.
+### Sideload the Render-hosted add-in
+
+Use this mode on another computer when you do not want to run the local
+`excel-addin` dev server.
+
+1. Make sure the Render service is deployed and live.
+2. Download or sideload this hosted manifest:
+   `https://umfstreamtoexcel.onrender.com/excel-addin/manifest.xml`
+3. In Excel, open **Insert → Add-ins → My Add-ins → Upload My Add-in**.
+4. Select the downloaded hosted manifest.
+5. Open the **StreamtoExcel** task pane from the Home ribbon.
+6. The task pane auto-fills:
+   - Backend URL: `https://umfstreamtoexcel.onrender.com`
+   - WebSocket URL: `wss://umfstreamtoexcel.onrender.com/ws`
+7. Log in with the same dashboard username/password, choose a started feed
+   session, then click **Connect feed**.
+
+The source file for the hosted manifest is `excel-addin/manifest.render.xml`.
+During the Render Docker build, it is copied into the add-in build output as
+`/excel-addin/manifest.xml`.
 
 ### Add-in checks
 

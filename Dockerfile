@@ -13,8 +13,16 @@ COPY frontend/ ./
 RUN npm run build
 # Output: /frontend/dist
 
+# ── Stage 2: build the Excel add-in task pane ────────────────────────────────
+FROM node:20-slim AS excel-addin-build
 
-# ── Stage 2: production runtime (Node.js 20 + Java 17) ────────────────────────
+WORKDIR /excel-addin
+COPY excel-addin/package*.json ./
+RUN npm ci
+COPY excel-addin/ ./
+RUN npm run build && cp manifest.render.xml dist/manifest.xml
+
+# ── Stage 3: production runtime (Node.js 20 + Java 17) ────────────────────────
 FROM node:20-slim
 
 # Install Java 17 runtime + curl (needed for JAR download at startup)
@@ -35,6 +43,9 @@ COPY backend/ ./backend/
 
 # Copy React build output so backend can serve it statically
 COPY --from=frontend-build /frontend/dist ./frontend/dist
+
+# Copy Excel add-in build output so backend can serve it for hosted manifests
+COPY --from=excel-addin-build /excel-addin/dist ./excel-addin/dist
 
 # Copy the java-plugin dist folder structure.
 # The proprietary LSEG JARs are NOT included in this repo — they are downloaded

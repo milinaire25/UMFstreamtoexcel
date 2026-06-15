@@ -34,6 +34,8 @@ const els = {
   log: document.querySelector('#log'),
 };
 
+applyDefaultEndpoints();
+
 Office.onReady(() => {
   state.officeReady = typeof Excel !== 'undefined';
   if (!state.officeReady) {
@@ -57,6 +59,16 @@ els.form.addEventListener('submit', (event) => {
 });
 els.disconnectButton.addEventListener('click', disconnectFeed);
 els.clearButton.addEventListener('click', clearSheet);
+
+function applyDefaultEndpoints() {
+  const isLocalHost = ['localhost', '127.0.0.1'].includes(window.location.hostname);
+  const isHosted = window.location.protocol === 'https:' && !isLocalHost;
+
+  if (isHosted) {
+    els.backendUrl.value = window.location.origin;
+    els.wsUrl.value = socketUrlFromBackend(window.location.origin);
+  }
+}
 
 async function loginAndLoadSessions() {
   setStatus('connecting', 'Logging in...');
