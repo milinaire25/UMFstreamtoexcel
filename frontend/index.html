@@ -11,6 +11,119 @@
   </head>
   <body>
     <div id="root"></div>
+    <script>
+      window.__streamtoexcelFallback = function () {
+        var root = document.getElementById('root');
+        if (!root || root.children.length) return;
+
+        var token = '';
+        root.innerHTML = [
+          '<main style="font-family:Inter,system-ui,sans-serif;min-height:100vh;background:#f7f8fb;color:#111827;padding:32px;">',
+          '<section style="max-width:960px;margin:0 auto;background:#fff;border:1px solid #e5e7eb;border-radius:10px;box-shadow:0 10px 30px rgba(15,23,42,.08);padding:24px;">',
+          '<h1 style="margin:0 0 6px;font-size:24px;">StreamtoExcel</h1>',
+          '<p style="margin:0 0 20px;color:#6b7280;">Fallback dashboard loaded. Create and start a UMF feed session here.</p>',
+          '<div id="fallback-status" style="margin-bottom:16px;color:#6b7280;font-size:13px;">Not logged in.</div>',
+          '<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:18px;">',
+          '<form id="fallback-login" style="display:grid;gap:10px;">',
+          '<h2 style="margin:0;font-size:15px;">Dashboard login</h2>',
+          '<input name="username" value="admin" placeholder="Username" required style="padding:10px;border:1px solid #d1d5db;border-radius:8px;">',
+          '<input name="password" type="password" placeholder="Dashboard password" required style="padding:10px;border:1px solid #d1d5db;border-radius:8px;">',
+          '<button type="submit" style="padding:10px 14px;border:0;border-radius:8px;background:#0f766e;color:#fff;font-weight:700;">Login</button>',
+          '</form>',
+          '<form id="fallback-session" style="display:grid;gap:10px;">',
+          '<h2 style="margin:0;font-size:15px;">Create feed session</h2>',
+          '<input name="serviceAccount" placeholder="Feed service account" required style="padding:10px;border:1px solid #d1d5db;border-radius:8px;">',
+          '<input name="password" type="password" placeholder="Feed password" required style="padding:10px;border:1px solid #d1d5db;border-radius:8px;">',
+          '<select name="trackType" style="padding:10px;border:1px solid #d1d5db;border-radius:8px;"><option value="email">Track email</option><option value="uuid">Track UUID</option></select>',
+          '<input name="trackValue" placeholder="Track email or UUID" required style="padding:10px;border:1px solid #d1d5db;border-radius:8px;">',
+          '<select name="env" style="padding:10px;border:1px solid #d1d5db;border-radius:8px;"><option value="prod">prod</option><option value="qa">qa</option><option value="trd">trd</option><option value="dev">dev</option><option value="beta">beta / PPE</option></select>',
+          '<button type="submit" style="padding:10px 14px;border:0;border-radius:8px;background:#0f766e;color:#fff;font-weight:700;">Create and start session</button>',
+          '</form>',
+          '</div>',
+          '<pre id="fallback-output" style="white-space:pre-wrap;margin-top:18px;background:#111827;color:#d1fae5;border-radius:8px;padding:14px;min-height:90px;font-size:12px;"></pre>',
+          '</section>',
+          '</main>',
+        ].join('');
+
+        var status = document.getElementById('fallback-status');
+        var output = document.getElementById('fallback-output');
+        function log(message) {
+          output.textContent = '[' + new Date().toLocaleTimeString() + '] ' + message + '\n' + output.textContent;
+        }
+        function headers() {
+          var value = { 'Content-Type': 'application/json' };
+          if (token) value.Authorization = 'Bearer ' + token;
+          return value;
+        }
+        function request(method, path, body) {
+          return fetch(path, {
+            method: method,
+            headers: headers(),
+            body: body ? JSON.stringify(body) : undefined,
+          }).then(function (response) {
+            return response.json().catch(function () { return {}; }).then(function (data) {
+              if (!response.ok) throw new Error(data.error || 'HTTP ' + response.status);
+              return data;
+            });
+          });
+        }
+
+        document.getElementById('fallback-login').addEventListener('submit', function (event) {
+          event.preventDefault();
+          var form = event.currentTarget;
+          status.textContent = 'Logging in...';
+          request('POST', '/api/auth/login', {
+            username: form.username.value.trim(),
+            password: form.password.value,
+          }).then(function (data) {
+            token = data.token;
+            status.textContent = 'Logged in. Ready to create a session.';
+            log('Dashboard login succeeded.');
+          }).catch(function (error) {
+            status.textContent = 'Login failed.';
+            log('Login failed: ' + error.message);
+          });
+        });
+
+        document.getElementById('fallback-session').addEventListener('submit', function (event) {
+          event.preventDefault();
+          if (!token) {
+            log('Login first.');
+            return;
+          }
+          var form = event.currentTarget;
+          var trackType = form.trackType.value;
+          var body = {
+            serviceAccount: form.serviceAccount.value.trim(),
+            password: form.password.value,
+            env: form.env.value,
+            trackEmail: trackType === 'email' ? form.trackValue.value.trim() : '',
+            trackUUID: trackType === 'uuid' ? form.trackValue.value.trim() : '',
+          };
+          log('Creating session...');
+          request('POST', '/api/sessions', body).then(function (session) {
+            log('Created session ' + session.id + '. Starting feed...');
+            return request('POST', '/api/sessions/' + session.id + '/start').then(function (started) {
+              log('Session status: ' + started.status + '\\nSession id: ' + started.id);
+            });
+          }).catch(function (error) {
+            log('Session failed: ' + error.message);
+          });
+        });
+      };
+
+      window.addEventListener('error', function (event) {
+        window.__streamtoexcelError = event.message;
+        setTimeout(window.__streamtoexcelFallback, 0);
+      });
+      window.addEventListener('unhandledrejection', function (event) {
+        window.__streamtoexcelError = event.reason && event.reason.message || String(event.reason);
+        setTimeout(window.__streamtoexcelFallback, 0);
+      });
+      window.addEventListener('DOMContentLoaded', function () {
+        setTimeout(window.__streamtoexcelFallback, 1800);
+      });
+    </script>
     <script type="module" src="/src/main.jsx"></script>
   </body>
 </html>
