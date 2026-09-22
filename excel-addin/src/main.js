@@ -1,4 +1,6 @@
 import './styles.css';
+import { appendUnseenRows } from './deduplicate.js';
+import { createWriteQueue } from './writeQueue.js';
 import {
   HEADERS,
   SHEET_NAME,
@@ -13,6 +15,7 @@ const state = {
   token: '',
   socket: null,
   count: 0,
+  received: 0,
   officeReady: false,
 };
 
@@ -33,6 +36,11 @@ const els = {
   lastReceived: document.querySelector('#last-received'),
   log: document.querySelector('#log'),
 };
+
+const writes = createWriteQueue(writeRows, (error, count) => {
+  setStatus('error', `Excel write failed (${count} messages): ${error.message}`);
+  log(error.stack || error.message);
+});
 
 applyDefaultEndpoints();
 
@@ -58,7 +66,9 @@ els.form.addEventListener('submit', (event) => {
   connectFeed();
 });
 els.disconnectButton.addEventListener('click', disconnectFeed);
-els.clearButton.addEventListener('click', clearSheet);
+els.clearButton.addEventListener('click', () => {
+  writes.run(clearSheet).catch((error) => setStatus('error', `Clear failed: ${error.message}`));
+});
 
 function applyDefaultEndpoints() {
   const isLocalHost = ['localhost', '127.0.0.1'].includes(window.location.hostname);
@@ -126,15 +136,18 @@ function connectFeed() {
 
   disconnectFeed();
   els.wsUrl.value = normalizeWebSocketUrl(els.wsUrl.value);
-  state.socket = new WebSocket(els.wsUrl.value);
+  const socket = new WebSocket(els.wsUrl.value);
+  state.socket = socket;
   setStatus('connecting', 'Opening WebSocket...');
 
-  state.socket.addEventListener('open', () => {
-    state.socket.send(JSON.stringify({ type: 'auth', token: state.token, sessionId }));
+  socket.addEventListener('open', () => {
+    if (state.socket !== socket) return;
+    socket.send(JSON.stringify({ type: 'auth', token: state.token, sessionId }));
     setStatus('connecting', 'Authenticating feed...');
   });
 
-  state.socket.addEventListener('message', async (event) => {
+  socket.addEventListener('message', (event) => {
+    if (state.socket !== socket) return;
     let payload;
     try {
       payload = JSON.parse(event.data);
@@ -160,15 +173,22 @@ function connectFeed() {
     }
 
     if (payload.type === 'message') {
-      await writeMessage(payload.data);
+      state.received += 1;
+      const receivedAt = new Date().toISOString();
+      els.lastReceived.textContent = new Date(receivedAt).toLocaleTimeString();
+      log(`Feed message received (${state.received}); queued for Excel`);
+      writes.add(messageToRow(payload.data, receivedAt));
     }
   });
 
-  state.socket.addEventListener('error', () => {
+  socket.addEventListener('error', () => {
+    if (state.socket !== socket) return;
     setStatus('error', 'WebSocket error. Check the URL and backend status.');
   });
 
-  state.socket.addEventListener('close', (event) => {
+  socket.addEventListener('close', (event) => {
+    if (state.socket !== socket) return;
+    state.socket = null;
     els.disconnectButton.disabled = true;
     if (event.code && event.code !== 1000) {
       setStatus('error', `WebSocket closed (${event.code}) ${event.reason || ''}`.trim());
@@ -184,28 +204,22 @@ function disconnectFeed() {
     state.socket = null;
   }
   els.disconnectButton.disabled = true;
+  setStatus('idle', 'Disconnected');
 }
 
-async function writeMessage(message) {
-  const receivedAt = new Date().toISOString();
-  const row = messageToRow(message, receivedAt);
-
+async function writeRows(rows) {
   if (!state.officeReady) {
-    log(`Preview only: ${row[4] || row[6]}`);
-    return;
+    throw new Error('Excel is not ready. Keep the task pane open and reconnect once Excel has loaded.');
   }
 
-  await Excel.run(async (context) => {
+  const written = await Excel.run(async (context) => {
     const table = await getOrCreateFeedTable(context);
-    table.rows.add(0, [row]);
-    table.getRange().format.autofitColumns();
-    await context.sync();
+    return appendUnseenRows(context, table, rows);
   });
 
-  state.count += 1;
+  state.count += written;
   els.messageCount.textContent = String(state.count);
-  els.lastReceived.textContent = new Date(receivedAt).toLocaleTimeString();
-  setStatus('connected', 'Connected - latest message written to row 2');
+  log(`Wrote ${written} messages; skipped ${rows.length - written} duplicates (${state.count} written this run)`);
 }
 
 async function clearSheet() {
@@ -239,7 +253,6 @@ async function getOrCreateFeedTable(context) {
     sheet = context.workbook.worksheets.add(SHEET_NAME);
   }
 
-  sheet.activate();
   let table = context.workbook.tables.getItemOrNullObject(TABLE_NAME);
   await context.sync();
 

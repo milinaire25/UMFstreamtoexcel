@@ -140,6 +140,14 @@ Incoming messages are written to the `UMF Feed` worksheet in the
 `UMFFeedMessages` table. Each message gets its own row, and new rows are
 inserted at the top of the table so the latest message appears first.
 
+On reconnect, the backend replays its saved buffer (500 messages by default).
+The add-in compares replayed payloads with the table's `Raw JSON` column and
+skips messages already saved, including after reopening the task pane. Keep
+that column intact for duplicate detection. Existing duplicate rows are not
+removed. Clearing the sheet allows the saved buffer to be imported again.
+Workbook writes run in batches, one at a time; the task-pane log reports
+received messages, inserted rows, skipped duplicates, and write failures.
+
 ### Run the add-in locally
 
 Start the existing backend and frontend as usual:
