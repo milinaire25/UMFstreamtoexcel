@@ -383,3 +383,17 @@ Quotes with a trailing question mark, such as `TTF Nov 26 32.34/49?`,
 are displayed as 32.34 / 32.49 with an **Unconfirmed (?)** label. They remain
 in the displayed-price comparison; Best Market indicates when an unconfirmed
 quote contributes a best side. Repeated posts from the same sender update one row.
+
+## Gas Bulletin board
+
+The Gas Bulletin board tab presents TTF quotes as a single table with TTF
+(contract), BID, ASK, Size, Time, and Sender email columns. Each sender has one
+latest row per contract, ordered by delivery period. Summer/Winter labels are
+expanded, sizes display in MW, and unknown sizes remain a dash. It shares the
+GAS parser, including TTF defaults, upcoming-year inference, and unconfirmed
+question-mark labels. Other explicit products such as NBP are excluded.
+
+Time is age since the message timestamp (receipt time is the fallback), updated
+every second while the tab is open. Quotes at least four minutes old show a
+warning; they remain visible. Replayed messages do not reset their age. Quotes
+are taken from the available session buffer, with no additional history store.

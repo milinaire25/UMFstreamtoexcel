@@ -721,3 +721,11 @@ pre, code {
 .gas-empty code { display: inline-block; text-align: left; margin-top: 12px; padding: 12px 24px; border-radius: var(--r); background: var(--surface-2); }
 
 .gas-unconfirmed { display: block; margin-top: 3px; color: var(--amber); font-size: 11px; font-weight: 600; }
+
+.gas-bulletin-table { min-width: 680px; border-collapse: separate; border-spacing: 0; }
+.gas-bulletin-table thead th { position: sticky; top: -14px; z-index: 1; background: var(--surface-3); font-weight: 600; }
+.gas-bulletin-table td { white-space: nowrap; }
+.gas-bulletin-table .gas-bulletin-sender { white-space: normal; overflow-wrap: anywhere; min-width: 180px; }
+.gas-bulletin-table tbody th { font-weight: 600; }
+.gas-bulletin-table .gas-stale { background: var(--amber-bg); }
+.gas-age-warning { color: var(--amber); }
