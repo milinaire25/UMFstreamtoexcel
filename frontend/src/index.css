@@ -683,3 +683,16 @@ pre, code {
     scroll-behavior: auto !important;
   }
 }
+
+/* Live structured bond quotes */
+.bonds-summary { color: var(--text-2); font-size: 12px; margin-bottom: 12px; }
+.bonds-table { width: 100%; min-width: 740px; border-collapse: separate; border-spacing: 0; font-size: 12px; }
+.bonds-table th { position: sticky; top: -14px; z-index: 1; background: var(--surface-3); color: var(--text-2); text-align: left; font-weight: 600; white-space: nowrap; border-top: 1px solid var(--border); }
+.bonds-table th, .bonds-table td { padding: 12px; border-bottom: 1px solid var(--border); vertical-align: top; }
+.bonds-table td { font-variant-numeric: tabular-nums; white-space: nowrap; }
+.bonds-table tbody tr:nth-child(even) { background: var(--surface-2); }
+.bonds-table tbody tr:hover { background: var(--accent-light); }
+.bonds-table .bonds-sender { white-space: normal; overflow-wrap: anywhere; min-width: 160px; max-width: 260px; }
+.bonds-table .bonds-issuer { font-weight: 600; white-space: normal; min-width: 100px; }
+.bonds-table .bonds-price { font-weight: 600; color: var(--accent-dk); }
+.bonds-table .bonds-empty { padding: 40px 16px; text-align: center; color: var(--text-2); white-space: normal; line-height: 1.8; }

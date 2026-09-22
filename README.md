@@ -339,3 +339,17 @@ lseg-messenger-feed/
 ├── .env.example
 └── README.md
 ```
+
+## Bonds dashboard tab
+
+The Bonds tab beside Feed shows the 10 newest matching bond messages for the
+selected session, newest first, with a sticky header: Time, Sender, Issuer,
+Coupon, Instrument, Maturity, and Offer / Price. It updates with the live feed.
+
+For example, `7.63% NCD Google bond MD 20/08/2028 8.60 offer` becomes
+Google | 7.63% | NCD | 20/08/2028 | 8.60. Time and sender come from the message
+metadata. Matching supports case differences, multi-word issuers, MD or
+Maturity Date labels, and day/month/year dates using slashes or hyphens.
+The offer may appear as `8.60 offer` or `offer: 8.60`; missing offers display
+a dash. Unrecognized messages remain in Feed. Replayed identical payloads
+are shown once in Bonds. Run parser and ordering tests with `cd frontend && npm test`.
