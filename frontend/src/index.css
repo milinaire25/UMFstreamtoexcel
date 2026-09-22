@@ -696,3 +696,26 @@ pre, code {
 .bonds-table .bonds-issuer { font-weight: 600; white-space: normal; min-width: 100px; }
 .bonds-table .bonds-price { font-weight: 600; color: var(--accent-dk); }
 .bonds-table .bonds-empty { padding: 40px 16px; text-align: center; color: var(--text-2); white-space: normal; line-height: 1.8; }
+
+/* Broker-by-broker gas markets */
+.gas-settings { display: flex; flex-wrap: wrap; align-items: center; gap: 14px 24px; padding: 12px; background: var(--surface-2); border: 1px solid var(--border); border-radius: var(--r); }
+.gas-settings label { display: flex; align-items: center; gap: 8px; font-size: 12px; color: var(--text-2); }
+.gas-settings select { width: auto; padding: 5px 8px; }
+.gas-settings input { width: auto; }
+.gas-note { margin: 12px 0 18px; color: var(--text-2); font-size: 12px; line-height: 1.6; }
+.gas-market { margin-bottom: 20px; border: 1px solid var(--border); border-radius: var(--r); overflow: hidden; }
+.gas-heading { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 8px; padding: 12px 14px; background: var(--surface-2); }
+.gas-heading h3 { font-size: 14px; }
+.gas-heading span { font-size: 11px; color: var(--text-2); overflow-wrap: anywhere; }
+.gas-table-scroll { overflow-x: auto; }
+.gas-table { width: 100%; min-width: 620px; border-collapse: collapse; font-size: 12px; }
+.gas-table th, .gas-table td { padding: 11px 14px; text-align: left; border-top: 1px solid var(--border); font-variant-numeric: tabular-nums; }
+.gas-table thead th { color: var(--text-2); font-weight: 500; white-space: nowrap; }
+.gas-table tbody th { font-weight: 400; overflow-wrap: anywhere; max-width: 240px; }
+.gas-table tbody tr:hover { background: var(--surface-2); }
+.gas-table .gas-best { color: var(--accent-dk); background: var(--accent-light); font-weight: 700; }
+.gas-table tfoot { background: var(--accent-light); color: var(--accent-dk); font-weight: 700; }
+.gas-table tfoot td:last-child { font-size: 11px; font-weight: 400; }
+.gas-assumption { display: block; margin-top: 3px; color: var(--text-3); font-size: 10px; }
+.gas-empty { text-align: center; padding: 32px; color: var(--text-2); line-height: 1.8; }
+.gas-empty code { display: inline-block; text-align: left; margin-top: 12px; padding: 12px 24px; border-radius: var(--r); background: var(--surface-2); }

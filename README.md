@@ -353,3 +353,28 @@ Maturity Date labels, and day/month/year dates using slashes or hyphens.
 The offer may appear as `8.60 offer` or `offer: 8.60`; missing offers display
 a dash. Unrecognized messages remain in Feed. Replayed identical payloads
 are shown once in Bonds. Run parser and ordering tests with `cd frontend && npm test`.
+
+## GAS dashboard tab
+
+GAS groups the latest two-sided quote from each sender by product and delivery
+period across the selected session's chat rooms. It highlights the highest bid
+and lowest ask, with a Best Market row, message time, source room, and quoted MW
+size. New messages update the relevant broker's row; older replays do not replace
+newer prices. Brokers are identified by the UMF sender identifier/email.
+
+Supported lines include `Nov 32.35/50`, `TTF Nov26 32.35/32.50`,
+`Q1 34.20/40`, `Sum27 29.80/30.10`, and `Win27 33.70/34.00`. TTF and NBP
+headers apply to subsequent quote lines in the same message. When omitted,
+the product defaults to TTF. Missing years use the message date (UTC) and
+the next occurrence of the period's starting month, including the current month.
+For September 2026, Nov becomes Nov-26 and Q1 becomes Q1-27. Both defaults
+are visible and adjustable in the GAS tab; inferred fields are labeled.
+
+`10mw months, 20 seasons` applies sizes only to those period types; `20mw`
+applies to all quotes in that message. An inline size overrides the footer.
+Missing sizes display a dash. Abbreviated asks inherit the bid's integer part
+and roll up one whole unit if needed, so `31.95/05` becomes `31.95/32.05`.
+Unrecognized lines remain in Feed. Quotes are drawn from the available session
+history (currently up to 500 messages); no automatic expiry or withdrawal-text
+parsing is implemented. The table shows the latest received quotes, not a
+guarantee they are still available.

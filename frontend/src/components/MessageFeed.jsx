@@ -1,7 +1,8 @@
 import React, { useState, useRef, useEffect } from 'react';
 import BondsTable from './BondsTable';
+import GasTable from './GasTable';
 
-const TABS = ['feed', 'bonds', 'json', 'logs', 'command'];
+const TABS = ['feed', 'bonds', 'gas', 'json', 'logs', 'command'];
 
 const STATUS_STYLE = {
   running:    { color: 'var(--green)',  bg: 'var(--green-bg)',  label: 'Running' },
@@ -19,7 +20,7 @@ export default function MessageFeed({ session, messages, logs, errorMsg, onStart
   useEffect(() => {
     if (tab === 'bonds' && feedRef.current) {
       feedRef.current.scrollTop = 0;
-    } else if (autoScroll && feedRef.current) {
+    } else if (tab !== 'gas' && autoScroll && feedRef.current) {
       feedRef.current.scrollTop = feedRef.current.scrollHeight;
     }
   }, [messages, logs, autoScroll, tab]);
@@ -180,6 +181,7 @@ export default function MessageFeed({ session, messages, logs, errorMsg, onStart
           {TABS.map(t => {
             const label = t === 'feed'    ? `Feed  ${messages.length > 0 ? `(${messages.length})` : ''}`
                         : t === 'bonds'  ? 'Bonds'
+                        : t === 'gas'    ? 'GAS'
                         : t === 'logs'   ? `Logs${logs.length > 0 ? `  (${logs.length})` : ''}`
                         : t === 'json'   ? 'Raw JSON'
                         : 'Command';
@@ -223,6 +225,7 @@ export default function MessageFeed({ session, messages, logs, errorMsg, onStart
         <div ref={feedRef} style={{ flex: 1, overflow: 'auto', padding: '14px 16px', maxHeight: 520 }}>
 
           {tab === 'bonds' && <BondsTable messages={messages} />}
+          {tab === 'gas' && <GasTable key={session.id} messages={messages} />}
 
           {/* ── Feed tab ── */}
           {tab === 'feed' && (
