@@ -21,6 +21,7 @@ const ProcessManager   = require('./services/processManager');
 
 // ── App setup ────────────────────────────────────────────────────────────────
 const app    = express();
+require('./configureProxy')(app);
 const server = http.createServer(app);
 const wss    = new WebSocket.Server({ server, path: '/ws' });
 
