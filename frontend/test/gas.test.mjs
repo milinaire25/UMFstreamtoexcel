@@ -86,3 +86,37 @@ test('ignores unrelated chat, preserves inline sizes, and does not merge unknown
   assert.equal(parseGasMessage(msg('A','TTF Nov-2026 32.35/50 5mw\n20mw'))[0].quantity,5);
   assert.equal(parseGasMessage({message:'Nov 32.35/50'}).length,0);
 });
+
+
+test('accepts the reported spaced-year quote with a question mark and retains its status', () => {
+  const [row] = parseGasMessage(msg('broker2@example.com', 'TTF Nov 26 32.34/49?'));
+  assert.equal(row.product, 'TTF');
+  assert.equal(row.contract, 'Nov-26');
+  assert.equal(row.bid, 32.34);
+  assert.equal(row.ask, 32.49);
+  assert.equal(row.unconfirmed, true);
+  assert.equal(row.inferredYear, false);
+  assert.equal(row.inferredProduct, false);
+});
+
+test('question quote appears alongside broker 1; repeated posts stay one sender row', () => {
+  const [market] = gasMarkets([
+    msg('Broker 1', 'TTF Nov26 32.35/50'),
+    msg('Broker 2', 'TTF Nov 26 32.34/49?', '2026-09-22T17:34:42Z'),
+    msg('Broker 2', 'TTF Nov 26 32.34/49?', '2026-09-22T17:35:11Z'),
+    msg('Broker 2', 'TTF Nov 26 32.34/49?', '2026-09-22T17:36:35Z', 'other-room'),
+  ]);
+  assert.equal(market.brokers.length, 2);
+  assert.equal(market.bestBid, 32.35);
+  assert.equal(market.bestAsk, 32.49);
+  assert.equal(market.brokers[1].timestamp, Date.parse('2026-09-22T17:36:35Z'));
+  assert.equal(market.brokers[1].unconfirmed, true);
+});
+
+test('accepts spaced and full-width question marks without accepting arbitrary trailing text', () => {
+  for (const text of ['TTF Nov 26 32.34/49 ?', 'TTF Nov 26 32.34/49？？', 'TTF Nov 26 32.34/49 20mw?']) {
+    assert.equal(parseGasMessage(msg('A', text))[0].unconfirmed, true);
+  }
+  assert.equal(parseGasMessage(msg('A', 'TTF Nov 26 32.34/49 withdrawn?')).length, 0);
+  assert.equal(parseGasMessage(msg('A', 'TTF Nov 26 32.34/49'))[0].unconfirmed, false);
+});

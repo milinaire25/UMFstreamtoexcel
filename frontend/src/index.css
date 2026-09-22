@@ -719,3 +719,5 @@ pre, code {
 .gas-assumption { display: block; margin-top: 3px; color: var(--text-3); font-size: 10px; }
 .gas-empty { text-align: center; padding: 32px; color: var(--text-2); line-height: 1.8; }
 .gas-empty code { display: inline-block; text-align: left; margin-top: 12px; padding: 12px 24px; border-radius: var(--r); background: var(--surface-2); }
+
+.gas-unconfirmed { display: block; margin-top: 3px; color: var(--amber); font-size: 11px; font-weight: 600; }

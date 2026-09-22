@@ -57,7 +57,9 @@ export function parseGasMessage(message, { defaultProduct = 'TTF', inferYears = 
   const rows = [];
   for (const line of lines) {
     if (/^(TTF|NBP)$/i.test(line)) { product = line.toUpperCase(); inferredProduct = false; continue; }
-    const match = line.match(QUOTE);
+    const unconfirmed = /[?？]\s*$/.test(line);
+    const quoteLine = line.replace(/[?？]+\s*$/, '').trim();
+    const match = quoteLine.match(QUOTE);
     if (!match) continue;
     const [, explicitProduct, period, year, bidText, askText, size] = match;
     if (explicitProduct) { product = explicitProduct.toUpperCase(); inferredProduct = false; }
@@ -67,7 +69,7 @@ export function parseGasMessage(message, { defaultProduct = 'TTF', inferYears = 
       inferredProduct: inferredProduct && !!product, inferredYear: contract.inferred,
       unresolved: !product || contract.unresolved, order: contract.order,
       quantity: size ? Number(size) : sizes[contract.kind] ?? sizes.all ?? null,
-      sender, room, roomName, timestamp, source: data.message,
+      sender, room, roomName, timestamp, unconfirmed, source: data.message,
     });
   }
   return rows;

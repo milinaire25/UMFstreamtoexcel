@@ -378,3 +378,8 @@ Unrecognized lines remain in Feed. Quotes are drawn from the available session
 history (currently up to 500 messages); no automatic expiry or withdrawal-text
 parsing is implemented. The table shows the latest received quotes, not a
 guarantee they are still available.
+
+Quotes with a trailing question mark, such as `TTF Nov 26 32.34/49?`,
+are displayed as 32.34 / 32.49 with an **Unconfirmed (?)** label. They remain
+in the displayed-price comparison; Best Market indicates when an unconfirmed
+quote contributes a best side. Repeated posts from the same sender update one row.
