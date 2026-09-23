@@ -397,3 +397,28 @@ Time is age since the message timestamp (receipt time is the fallback), updated
 every second while the tab is open. Quotes at least four minutes old show a
 warning; they remain visible. Replayed messages do not reset their age. Quotes
 are taken from the available session buffer, with no additional history store.
+
+## Stopping UMF sessions
+
+On Render/Linux, Stop sends SIGINT directly to the Java process (the signal
+associated with terminal Ctrl+C), waits up to 15 seconds for shutdown hooks,
+and uses SIGKILL only if Java has not exited. Forced exit is reported explicitly
+and starts a 20-minute local service-account cooldown; it is never logged as
+a graceful stop. Java process exit alone is not proof of LSEG server-side logout.
+
+The UI shows Stopping until exit is observed. Concurrent starts for the same
+service account, including a new session ID, are blocked while it is active or
+stopping. Stop cancels pending reconnect timers and preserves existing upstream
+lock cooldowns. Cooldowns and account guards are in-memory and apply within one
+backend instance; they do not coordinate separate Render instances or survive
+a backend restart. Existing upstream locks must still expire at LSEG.
+
+Server SIGTERM/SIGINT shutdown blocks new starts, stops Java children, and drains
+HTTP/WebSocket clients. Native Windows Node process termination cannot deliver
+graceful POSIX SIGINT and is reported as forced; the production fix targets the
+Render Linux backend regardless of which OS the browser or Excel client uses.
+
+After deployment, verify logs show `Sending SIGINT` followed by `exited after
+SIGINT`, inspect Java shutdown logs, then test a new session for the same account.
+If forced termination or Session already exists is reported, respect the cooldown
+and inspect the Java logs instead of repeatedly restarting.

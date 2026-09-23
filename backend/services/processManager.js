@@ -14,6 +14,7 @@ const { spawn }        = require('child_process');
 const path             = require('path');
 const fs               = require('fs');
 const { sessionStore } = require('../store/sessions');
+const terminateProcess = require('./terminateProcess');
 
 // JAR paths — production vs PPE/beta
 // Sessions with env=beta use the PPE JAR; everything else uses the production JAR.
@@ -47,6 +48,11 @@ const _startLock  = new Set(); // sessionId → in-flight start (mutex)
 const _cooldowns  = new Map(); // sessionId → timestamp of last failed start
 const _restarts   = new Map(); // sessionId → { count, nextDelayMs, connectedOnce, locked }
 const _stopped    = new Set(); // sessions intentionally stopped — no auto-restart
+const _stopping = new Map(); // sessionId → shared stop promise
+const _restartTimers = new Map();
+const _accountCooldowns = new Map(); // service account → retry deadline
+let _shuttingDown = false;
+const accountKey = session => session.serviceAccount.trim().toLowerCase();
 let   _broadcast  = () => {};  // injected by server.js
 
 // If the session connected at least once and then dropped, auto-restart.
@@ -69,6 +75,22 @@ const LSEG_LOCK_PATTERNS  = [
 function setBroadcast(fn) { _broadcast = fn; }
 
 async function start(sessionId) {
+  if (_shuttingDown) throw new Error('Server is shutting down. Try again after it restarts.');
+  const session = sessionStore.get(sessionId);
+  if (!session) throw new Error('Session not found');
+  if (_stopping.has(sessionId)) throw new Error('Session is still stopping. Wait for Java to exit.');
+  const account = accountKey(session);
+  for (const id of new Set([..._processes.keys(), ..._stopping.keys()])) {
+    if (id !== sessionId && accountKey(sessionStore.get(id)) === account) {
+      throw new Error('This service account already has an active or stopping session. Stop it first.');
+    }
+  }
+  const retryAt = _accountCooldowns.get(account) || 0;
+  if (retryAt > Date.now()) throw new Error(`Service-account cooldown active — wait ${Math.ceil((retryAt - Date.now()) / 1000)}s before retrying.`);
+  _accountCooldowns.delete(account);
+  clearTimeout(_restartTimers.get(sessionId));
+  _restartTimers.delete(sessionId);
+
   // Hard mutex: only one in-flight start per session at a time
   if (_startLock.has(sessionId)) {
     console.warn(`[pm] start() called while already starting ${sessionId} — ignoring`);
@@ -97,8 +119,6 @@ async function start(sessionId) {
   _startLock.add(sessionId);
   _stopped.delete(sessionId); // user explicitly started — clear intentional-stop flag
 
-  const session = sessionStore.get(sessionId);
-  if (!session) { _startLock.delete(sessionId); throw new Error('Session not found'); }
 
   // Build the java command
   const trackArg = session.trackEmail
@@ -194,7 +214,7 @@ async function start(sessionId) {
       }
 
       // Detect "connected" signal from plugin
-      if (trimmed === '__CONNECTED__') {
+      if (trimmed === '__CONNECTED__' && !_stopped.has(sessionId)) {
         rs.connectedOnce = true;
         rs.count = 0;                           // reset restart counter on successful connect
         rs.nextDelayMs = RESTART_INITIAL_MS;
@@ -252,13 +272,19 @@ async function start(sessionId) {
   // ── exit ──────────────────────────────────────────────────────────────────
   proc.on('exit', (code, signal) => {
     console.log(`[pm] Session ${sessionId} exited code=${code} signal=${signal}`);
+    if (_processes.get(sessionId) !== proc) return;
     _processes.delete(sessionId);
     _startLock.delete(sessionId); // safety net
 
     session.pid = null;
 
+    if (rs.locked || signal === 'SIGKILL') {
+      _accountCooldowns.set(account, Date.now() + LSEG_LOCK_COOLDOWN);
+    }
+    if (_stopping.has(sessionId)) return; // stop() publishes the final outcome
+
     // ── Case 1: intentional stop (user clicked Stop / shutdown) ─────────────
-    if (_stopped.has(sessionId) || signal === 'SIGKILL') {
+    if (_stopped.has(sessionId)) {
       session.status = 'stopped';
       _restarts.delete(sessionId);
       sessionStore.set(sessionId, session);
@@ -281,7 +307,7 @@ async function start(sessionId) {
 
     // ── Case 3: Session connected at least once → transient disconnect ───────
     // Auto-restart with exponential backoff (LSEG closed their side, network blip, etc.)
-    if (rs.connectedOnce && rs.count < MAX_AUTO_RESTARTS) {
+    if (!_shuttingDown && signal !== 'SIGKILL' && rs.connectedOnce && rs.count < MAX_AUTO_RESTARTS) {
       const delayMs = rs.nextDelayMs;
       rs.count       += 1;
       rs.nextDelayMs  = Math.min(rs.nextDelayMs * 2, RESTART_MAX_MS);
@@ -291,9 +317,13 @@ async function start(sessionId) {
       session.status = 'connecting';
       sessionStore.set(sessionId, session);
       _broadcast(sessionId, { type: 'status', status: 'connecting', error: msg });
-      setTimeout(() => {
-        if (!_stopped.has(sessionId)) start(sessionId);
-      }, delayMs);
+      _restartTimers.set(sessionId, setTimeout(() => {
+        _restartTimers.delete(sessionId);
+        if (!_stopped.has(sessionId) && !_shuttingDown) start(sessionId).catch(error => {
+          session.status = 'error';
+          _broadcast(sessionId, { type: 'status', status: 'error', error: error.message });
+        });
+      }, delayMs));
       return;
     }
 
@@ -312,6 +342,8 @@ async function start(sessionId) {
 
   proc.on('error', (err) => {
     console.error(`[pm] Spawn error for ${sessionId}:`, err.message);
+    if (!proc.pid && _processes.get(sessionId) === proc) _processes.delete(sessionId);
+    _startLock.delete(sessionId);
     session.status = 'error';
     session.errorLog.push({ ts: new Date().toISOString(), text: err.message });
     sessionStore.set(sessionId, session);
@@ -323,47 +355,53 @@ async function start(sessionId) {
   sessionStore.set(sessionId, session);
 }
 
-async function stop(sessionId) {
-  const proc = _processes.get(sessionId);
-  _stopped.add(sessionId);       // mark as intentional — suppresses auto-restart
-  _cooldowns.delete(sessionId);  // manual stop clears any retry cooldown
-  _restarts.delete(sessionId);   // reset restart counter for next manual start
-  if (proc) {
-    _processes.delete(sessionId);
-
-    // Give Java up to 10 seconds to run its shutdown hooks (which close the LSEG session cleanly).
-    // On Windows we use taskkill /T to send a Ctrl+Break event which triggers JVM shutdown hooks,
-    // then fall back to SIGTERM if the process hasn't exited within the grace period.
-    const graceful = new Promise(resolve => proc.once('exit', resolve));
-
-    try {
-      // Ctrl+Break (Windows) triggers JVM shutdown hooks cleanly
-      require('child_process').exec(`taskkill /PID ${proc.pid} /T`, () => {});
-    } catch (_) {
-      proc.kill('SIGTERM');
+function stop(sessionId) {
+  if (_stopping.has(sessionId)) return _stopping.get(sessionId);
+  _stopped.add(sessionId);
+  clearTimeout(_restartTimers.get(sessionId));
+  _restartTimers.delete(sessionId);
+  _restarts.delete(sessionId);
+  // Publish the stop promise before any asynchronous work or exit callback.
+  const stopping = Promise.resolve().then(async () => {
+    const session = sessionStore.get(sessionId);
+    if (!session) return;
+    const proc = _processes.get(sessionId);
+    let forced = false;
+    if (proc) {
+      session.status = 'stopping';
+      _broadcast(sessionId, { type: 'status', status: 'stopping' });
+      console.log(`[pm] Sending SIGINT to session ${sessionId}; waiting for Java to exit`);
+      try {
+        ({ forced } = await terminateProcess(proc));
+      } catch (error) {
+        session.status = 'error';
+        _accountCooldowns.set(accountKey(session), Date.now() + LSEG_LOCK_COOLDOWN);
+        _broadcast(sessionId, { type: 'status', status: 'error', error: error.message });
+        throw error;
+      }
+      if (_processes.get(sessionId) === proc) _processes.delete(sessionId);
+      if (forced) _accountCooldowns.set(accountKey(session), Date.now() + LSEG_LOCK_COOLDOWN);
+      console.log(`[pm] Session ${sessionId} ${forced ? 'required forced termination' : 'exited after SIGINT'}`);
     }
-
-    // Wait up to 10 s for graceful exit, then force-kill
-    const timeout = new Promise(resolve => setTimeout(resolve, 10000));
-    await Promise.race([graceful, timeout]);
-
-    // If still alive after grace period, force kill
-    try { proc.kill('SIGKILL'); } catch (_) {}
-
-    console.log(`[pm] Session ${sessionId} stopped gracefully`);
-  }
-
-  const session = sessionStore.get(sessionId);
-  if (session) {
+    // Stop must not erase an existing upstream lock, even with no local process.
+    const retryAt = _accountCooldowns.get(accountKey(session)) || 0;
+    const warning = retryAt > Date.now()
+      ? `Service-account cooldown active — wait ${Math.ceil((retryAt - Date.now()) / 1000)}s. LSEG session release is not confirmed.` : null;
+    session.stopWarning = warning;
     session.status = 'stopped';
-    session.pid    = null;
+    session.pid = null;
     sessionStore.set(sessionId, session);
-    _broadcast(sessionId, { type: 'status', status: 'stopped' });
-  }
+    _broadcast(sessionId, { type: 'status', status: 'stopped', error: warning });
+  }).finally(() => _stopping.delete(sessionId));
+  _stopping.set(sessionId, stopping);
+  return stopping;
 }
 
 async function stopAll() {
-  await Promise.all([..._processes.keys()].map(id => stop(id)));
+  _shuttingDown = true;
+  for (const timer of _restartTimers.values()) clearTimeout(timer);
+  _restartTimers.clear();
+  await Promise.all([...new Set([..._processes.keys(), ..._stopping.keys()])].map(id => stop(id)));
 }
 
 module.exports = { start, stop, stopAll, setBroadcast };

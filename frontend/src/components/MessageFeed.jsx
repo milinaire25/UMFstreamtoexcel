@@ -6,6 +6,7 @@ import GasBulletin from './GasBulletin';
 const TABS = ['feed', 'bonds', 'gas', 'gas-bulletin', 'json', 'logs', 'command'];
 
 const STATUS_STYLE = {
+  stopping:   { color: 'var(--amber)', bg: 'var(--amber-bg)', label: 'Stopping…' },
   running:    { color: 'var(--green)',  bg: 'var(--green-bg)',  label: 'Running' },
   connecting: { color: 'var(--amber)',  bg: 'var(--amber-bg)',  label: 'Connecting…' },
   stopped:    { color: 'var(--text-3)', bg: 'var(--surface-2)',       label: 'Stopped' },
@@ -122,7 +123,7 @@ export default function MessageFeed({ session, messages, logs, errorMsg, onStart
             ) : (
               <button
                 onClick={onStart}
-                disabled={isCooldown}
+                disabled={isCooldown || session.status === 'stopping'}
                 title={isCooldown ? errorMsg : undefined}
                 style={{
                   background: isCooldown ? 'var(--surface-3)' : 'var(--accent)',
@@ -132,7 +133,7 @@ export default function MessageFeed({ session, messages, logs, errorMsg, onStart
                   boxShadow: isCooldown ? 'none' : '0 2px 12px rgba(204,120,92,0.3)',
                   cursor: isCooldown ? 'not-allowed' : 'pointer',
                 }}>
-                {isCooldown ? '⏳ Cooldown…' : '▶ Start feed'}
+                {session.status === 'stopping' ? 'Stopping…' : isCooldown ? '⏳ Cooldown…' : '▶ Start feed'}
               </button>
             )}
           </div>

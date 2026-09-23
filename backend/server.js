@@ -141,13 +141,33 @@ server.listen(PORT, () => {
 });
 
 // Graceful shutdown
+let shuttingDown = false;
 async function gracefulShutdown(signal) {
+  if (shuttingDown) return;
+  shuttingDown = true;
   console.log(`[server] ${signal} received — stopping all Java sessions gracefully…`);
-  await ProcessManager.stopAll();   // waits up to 10 s per session for JVM shutdown hooks
-  server.close(() => {
+  const deadline = setTimeout(() => {
+    console.error('[server] Shutdown deadline exceeded');
+    process.exit(1);
+  }, 25000);
+  const closed = new Promise(resolve => server.close(resolve));
+  try {
+    await ProcessManager.stopAll();
+    // Upgraded WebSockets are not closed by server.close().
+    for (const client of wss.clients) client.close(1001, 'Server shutting down');
+    const drain = setTimeout(() => {
+      for (const client of wss.clients) client.terminate();
+      server.closeAllConnections?.();
+    }, 2000);
+    await closed;
+    clearTimeout(drain);
+    clearTimeout(deadline);
     console.log('[server] HTTP server closed. Exiting.');
     process.exit(0);
-  });
+  } catch (error) {
+    console.error('[server] Shutdown failed:', error.message);
+    // Leave the deadline active rather than reporting a clean shutdown.
+  }
 }
 
 process.on('SIGTERM', () => gracefulShutdown('SIGTERM'));

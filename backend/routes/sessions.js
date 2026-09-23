@@ -53,9 +53,13 @@ router.get('/:id', (req, res) => {
 router.delete('/:id', async (req, res) => {
   const s = getOwned(req);
   if (!s) return res.status(404).json({ error: 'Not found' });
-  await ProcessManager.stop(req.params.id);
-  sessionStore.delete(req.params.id);
-  res.json({ deleted: req.params.id });
+  try {
+    await ProcessManager.stop(req.params.id);
+    sessionStore.delete(req.params.id);
+    res.json({ deleted: req.params.id });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
 });
 
 // POST /api/sessions/:id/start
@@ -76,8 +80,12 @@ router.post('/:id/start', async (req, res) => {
 router.post('/:id/stop', async (req, res) => {
   const s = getOwned(req);
   if (!s) return res.status(404).json({ error: 'Not found' });
-  await ProcessManager.stop(req.params.id);
-  res.json(sanitize(sessionStore.get(req.params.id)));
+  try {
+    await ProcessManager.stop(req.params.id);
+    res.json(sanitize(sessionStore.get(req.params.id)));
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
 });
 
 // GET /api/sessions/:id/messages

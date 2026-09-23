@@ -1,6 +1,7 @@
 import React from 'react';
 
 const STATUS = {
+  stopping:     { color: 'var(--amber)', label: 'Stopping…', pulse: 'pulse-amber' },
   running:      { color: 'var(--green)',  label: 'Running',      pulse: 'pulse-green' },
   connecting:   { color: 'var(--amber)',  label: 'Connecting',   pulse: 'pulse-amber' },
   stopped:      { color: 'var(--text-3)', label: 'Stopped',      pulse: null },
@@ -128,12 +129,12 @@ export default function SessionSidebar({ sessions, activeId, loading, messages, 
                         Stop
                       </button>
                     ) : (
-                      <button className="sm" onClick={e => { e.stopPropagation(); onStart(s.id); }}
+                      <button className="sm" disabled={s.status === 'stopping'} onClick={e => { e.stopPropagation(); onStart(s.id); }}
                         style={{ fontSize: 10, padding: '2px 8px', background: 'var(--accent)', color: '#fff', border: 'none' }}>
-                        Start
+                        {s.status === 'stopping' ? 'Stopping…' : 'Start'}
                       </button>
                     )}
-                    <button className="sm" onClick={e => { e.stopPropagation(); onDelete(s.id); }}
+                    <button className="sm" disabled={s.status === 'stopping'} onClick={e => { e.stopPropagation(); onDelete(s.id); }}
                       style={{ fontSize: 10, padding: '2px 7px', color: 'var(--text-3)', border: '1px solid var(--border)' }}>
                       ✕
                     </button>

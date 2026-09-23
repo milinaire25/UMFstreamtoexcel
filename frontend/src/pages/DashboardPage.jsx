@@ -90,20 +90,30 @@ export default function DashboardPage() {
   }
 
   async function handleStop(id) {
-    await api.stopSession(id);
-    setSessions(prev => prev.map(x => x.id === id ? { ...x, status: 'stopped' } : x));
-    setErrors(prev => { const c = { ...prev }; delete c[id]; return c; });
-    sockets.current[id]?.close();
-    delete sockets.current[id];
+    setSessions(prev => prev.map(x => x.id === id ? { ...x, status: 'stopping' } : x));
+    try {
+      const stopped = await api.stopSession(id);
+      setSessions(prev => prev.map(x => x.id === id ? { ...x, status: stopped.status } : x));
+      setErrors(prev => { const c = { ...prev }; if (stopped.stopWarning) c[id] = stopped.stopWarning; else delete c[id]; return c; });
+      sockets.current[id]?.close();
+      delete sockets.current[id];
+    } catch (error) {
+      setSessions(prev => prev.map(x => x.id === id ? { ...x, status: 'error' } : x));
+      setErrors(prev => ({ ...prev, [id]: error.message }));
+    }
   }
 
   async function handleDelete(id) {
-    await api.deleteSession(id);
-    setSessions(prev => prev.filter(x => x.id !== id));
-    setMessages(prev => { const c = { ...prev }; delete c[id]; return c; });
-    sockets.current[id]?.close();
-    delete sockets.current[id];
-    if (activeId === id) setActiveId(null);
+    try {
+      await api.deleteSession(id);
+      setSessions(prev => prev.filter(x => x.id !== id));
+      setMessages(prev => { const c = { ...prev }; delete c[id]; return c; });
+      sockets.current[id]?.close();
+      delete sockets.current[id];
+      if (activeId === id) setActiveId(null);
+    } catch (error) {
+      setErrors(prev => ({ ...prev, [id]: error.message }));
+    }
   }
 
   const activeSession = sessions.find(s => s.id === activeId);
