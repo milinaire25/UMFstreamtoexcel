@@ -79,7 +79,7 @@ function LoginForm() {
 export default function LoginPage() {
   return <main className="landing">
     <nav className="landing-nav" aria-label="Main navigation">
-      <Link className="landing-brand" to="/login"><BrandMark /><span>StreamtoExcel<span className="brand-caption">THE LIVE MESSAGE FEED</span></span></Link>
+      <Link className="landing-brand" to="/login"><BrandMark /><span>StreamtoApps<span className="brand-caption">THE LIVE MESSAGE FEED</span></span></Link>
       <div className="landing-nav-links"><a href="#how-it-works">How it works</a><a href="#sign-in" className="nav-signin">Sign in <ArrowUpRight size={15} /></a></div>
     </nav>
     <section className="landing-hero">
@@ -100,6 +100,6 @@ export default function LoginPage() {
       </div>
       <div className="landing-features">{[["01", "Listen", "Bring your UMF conversations into one live feed."],["02", "Structure", "Read bond details and compare gas quotes across brokers."],["03", "Work", "Follow the market in your dashboard or stream messages to Excel."]].map(([number,title,copy])=><div key={number}><span>{number}</span><div><h3>{title}</h3><p>{copy}</p></div></div>)}</div>
     </section>
-    <footer className="landing-footer"><span>StreamtoExcel</span><span>Built for the flow of your working day.</span><a href="#sign-in">Open Feed <ArrowUpRight size={14} /></a></footer>
+    <footer className="landing-footer"><span>StreamtoApps</span><span>Built for the flow of your working day.</span><a href="#sign-in">Open Feed <ArrowUpRight size={14} /></a></footer>
   </main>;
 }
