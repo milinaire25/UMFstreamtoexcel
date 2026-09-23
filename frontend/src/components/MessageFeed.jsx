@@ -2,6 +2,7 @@ import React, { useState, useRef, useEffect } from 'react';
 import BondsTable from './BondsTable';
 import GasTable from './GasTable';
 import GasBulletin from './GasBulletin';
+import { recentMessages } from '../recentMessages.mjs';
 
 const TABS = ['feed', 'bonds', 'gas', 'gas-bulletin', 'json', 'logs', 'command'];
 
@@ -18,6 +19,17 @@ export default function MessageFeed({ session, messages, logs, errorMsg, onStart
   const [filter,     setFilter]     = useState('');
   const [autoScroll, setAutoScroll] = useState(true);
   const feedRef = useRef(null);
+  const [now, setNow] = useState(Date.now);
+  useEffect(() => {
+    const refresh = () => setNow(Date.now());
+    const timer = setInterval(refresh, 1000);
+    document.addEventListener('visibilitychange', refresh);
+    return () => {
+      clearInterval(timer);
+      document.removeEventListener('visibilitychange', refresh);
+    };
+  }, []);
+  const visibleMessages = recentMessages(messages, now);
 
   useEffect(() => {
     if (tab === 'bonds' && feedRef.current) {
@@ -28,8 +40,8 @@ export default function MessageFeed({ session, messages, logs, errorMsg, onStart
   }, [messages, logs, autoScroll, tab]);
 
   const filteredMsgs = filter
-    ? messages.filter(m => JSON.stringify(m).toLowerCase().includes(filter.toLowerCase()))
-    : messages;
+    ? visibleMessages.filter(m => JSON.stringify(m).toLowerCase().includes(filter.toLowerCase()))
+    : visibleMessages;
 
   const lastMsg  = messages[messages.length - 1];
   const st       = STATUS_STYLE[session.status] || STATUS_STYLE.stopped;
@@ -109,7 +121,7 @@ export default function MessageFeed({ session, messages, logs, errorMsg, onStart
               background: 'var(--surface-2)', padding: '4px 10px',
               borderRadius: 20, border: '1px solid var(--border)',
             }}>
-              {messages.length} messages
+              {visibleMessages.length} messages · last 3 min
             </div>
 
             {isRunning ? (
@@ -181,7 +193,7 @@ export default function MessageFeed({ session, messages, logs, errorMsg, onStart
           gap: 2, flexWrap: 'wrap',
         }}>
           {TABS.map(t => {
-            const label = t === 'feed'    ? `Feed  ${messages.length > 0 ? `(${messages.length})` : ''}`
+            const label = t === 'feed'    ? `Feed (${visibleMessages.length})`
                         : t === 'bonds'  ? 'Bonds'
                         : t === 'gas'    ? 'GAS'
                         : t === 'gas-bulletin' ? 'Gas Bulletin board'
@@ -227,9 +239,9 @@ export default function MessageFeed({ session, messages, logs, errorMsg, onStart
         {/* Content area */}
         <div ref={feedRef} style={{ flex: 1, overflow: 'auto', padding: '14px 16px', maxHeight: '65vh' }}>
 
-          {tab === 'bonds' && <BondsTable messages={messages} />}
-          {tab === 'gas' && <GasTable key={session.id} messages={messages} />}
-          {tab === 'gas-bulletin' && <GasBulletin key={session.id} messages={messages} />}
+          {tab === 'bonds' && <BondsTable messages={visibleMessages} />}
+          {tab === 'gas' && <GasTable key={session.id} messages={visibleMessages} />}
+          {tab === 'gas-bulletin' && <GasBulletin key={session.id} messages={visibleMessages} />}
 
           {/* ── Feed tab ── */}
           {tab === 'feed' && (

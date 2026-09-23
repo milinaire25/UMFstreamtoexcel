@@ -422,3 +422,17 @@ After deployment, verify logs show `Sending SIGINT` followed by `exited after
 SIGINT`, inspect Java shutdown logs, then test a new session for the same account.
 If forced termination or Session already exists is reported, respect the cooldown
 and inspect the Java logs instead of repeatedly restarting.
+
+## Three-minute demo display
+
+Feed, Bonds, GAS, and Gas Bulletin board display only messages received by the
+backend within the last three minutes. A one-second UI clock clears expired
+rows even without new messages; returning to the tab refreshes the clock.
+GAS best bid/ask is recalculated from the remaining recent messages.
+Reconnect replay retains the original server receipt timestamp, so old messages
+do not reappear. A newly sent message, even with identical text, appears again.
+Creation time is used only when server receipt time is unavailable; messages
+without either valid timestamp are excluded from these four views.
+
+This is a display filter: backend buffers, Raw JSON, logs, and Excel worksheet
+rows are not deleted. Sidebar totals still represent buffered message counts.

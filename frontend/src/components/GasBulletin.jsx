@@ -12,7 +12,7 @@ export default function GasBulletin({ messages }) {
   }, []);
 
   return <div className="gas-bulletin">
-    <p className="gas-note">Latest TTF quote per sender and contract, ordered by delivery period. Time is message age; ⚠ marks quotes at least 4 minutes old. Missing product defaults to TTF; missing years use the next delivery period.</p>
+    <p className="gas-note">TTF quotes received in the last 3 minutes, ordered by delivery period. Latest quote per sender and contract. Time is message age; ⚠ marks quotes at least 4 minutes old. Missing product defaults to TTF; missing years use the next delivery period.</p>
     <table className="gas-table gas-bulletin-table" aria-label="TTF gas bulletin board">
       <thead><tr>{['TTF', 'BID', 'ASK', 'Size', 'Time', 'Sender email'].map(label => <th key={label} scope="col">{label}</th>)}</tr></thead>
       <tbody>{rows.map(row => {

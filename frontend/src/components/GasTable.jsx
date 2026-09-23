@@ -14,7 +14,7 @@ export default function GasTable({ messages }) {
       </select></label>
       <label><input type="checkbox" checked={inferYears} onChange={event => setInferYears(event.target.checked)} /> Resolve missing years to next delivery period</label>
     </div>
-    <p className="gas-note">Latest quote per sender and period across the selected session’s chat rooms. Best bid is the highest; best ask is the lowest. Messages ending in ? are labeled Unconfirmed. Quotes stay visible until replaced in the available message history.</p>
+    <p className="gas-note">Quotes received in the last 3 minutes. Latest quote per sender and period across the selected session’s chat rooms. Best bid is the highest; best ask is the lowest. Messages ending in ? are labeled Unconfirmed.</p>
     {!markets.length && <div className="gas-empty">Waiting for gas quotes.<br /><code>TTF<br />Nov 32.35/50<br />20mw</code></div>}
     {markets.map(market => <section className="gas-market" key={market.key}>
       <div className="gas-heading"><h3>{market.product} {market.contract}</h3><span>{market.brokers.length} broker{market.brokers.length === 1 ? '' : 's'}</span></div>

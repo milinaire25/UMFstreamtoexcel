@@ -5,7 +5,7 @@ export default function BondsTable({ messages }) {
   const bonds = latestBonds(messages);
   return (
     <div className="bonds-view">
-      <p className="bonds-summary">Latest {bonds.length} bond messages · Newest first</p>
+      <p className="bonds-summary">Latest {bonds.length} bond messages · Last 3 minutes · Newest first</p>
       <table className="bonds-table" aria-label="Latest bond messages">
         <thead><tr>
           {['Time', 'Sender', 'Issuer', 'Coupon', 'Instrument', 'Maturity', 'Offer / Price'].map(label => (
