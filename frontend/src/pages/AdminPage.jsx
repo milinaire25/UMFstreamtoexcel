@@ -34,12 +34,12 @@ export default function AdminPage() {
     <div style={{ display: 'flex', flexDirection: 'column', minHeight: '100vh', background: 'var(--bg)' }}>
       <Topbar user={user} onLogout={() => { logout(); nav('/login'); }} isAdmin />
 
-      <div style={{ padding: '28px 24px', maxWidth: 860, margin: '0 auto', width: '100%' }}>
+      <div className="admin-layout">
 
         {/* Page header */}
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 24 }}>
           <div>
-            <h1 style={{ fontSize: 20, fontWeight: 700, color: 'var(--text-1)', letterSpacing: '-0.3px' }}>User Management</h1>
+            <h1 style={{ fontSize: 20, fontWeight: 700, color: 'var(--text-1)', letterSpacing: '-0.3px' }}>Workspace members</h1>
             <p style={{ fontSize: 13, color: 'var(--text-3)', marginTop: 4 }}>{users.length} user{users.length !== 1 ? 's' : ''} registered</p>
           </div>
           <Link to="/" style={{
@@ -57,7 +57,7 @@ export default function AdminPage() {
           <h2 style={{ fontSize: 13, fontWeight: 700, color: 'var(--text-2)', marginBottom: 18, letterSpacing: '0.5px', textTransform: 'uppercase' }}>
             Add New User
           </h2>
-          <form onSubmit={handleCreate} style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 14 }}>
+          <form className="admin-user-form" onSubmit={handleCreate}>
             <div>
               <label style={lbl}>Full name</label>
               <input value={form.name} onChange={e => setForm(f => ({ ...f, name: e.target.value }))} placeholder="Jane Smith" required />

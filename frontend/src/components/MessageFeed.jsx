@@ -61,7 +61,7 @@ export default function MessageFeed({ session, messages, logs, errorMsg, onStart
     <div style={{ display: 'flex', flexDirection: 'column', gap: 12, flex: 1, animation: 'fadeIn 0.2s ease' }}>
 
       {/* ── Session header ─────────────────────────────────────────────── */}
-      <div className="card" style={{ padding: '14px 18px' }}>
+      <div className="card session-header" style={{ padding: '14px 18px' }}>
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: 12 }}>
 
           <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
@@ -173,7 +173,7 @@ export default function MessageFeed({ session, messages, logs, errorMsg, onStart
       <div className="card" style={{ flex: 1, display: 'flex', flexDirection: 'column', padding: 0, overflow: 'hidden' }}>
 
         {/* Tab bar */}
-        <div style={{
+        <div className="feed-tabbar" style={{
           display: 'flex', alignItems: 'center',
           borderBottom: '1px solid var(--border)',
           padding: '0 4px', background: 'var(--surface)',
@@ -190,7 +190,7 @@ export default function MessageFeed({ session, messages, logs, errorMsg, onStart
                         : 'Command';
             const active = tab === t;
             return (
-              <button key={t} onClick={() => setTab(t)} style={{
+              <button key={t} className={active ? 'feed-tab is-active' : 'feed-tab'} aria-pressed={active} onClick={() => setTab(t)} style={{
                 border: 'none', borderBottom: `2px solid ${active ? 'var(--accent)' : 'transparent'}`,
                 background: 'none', padding: '11px 14px',
                 fontSize: 12, borderRadius: 0,
@@ -225,7 +225,7 @@ export default function MessageFeed({ session, messages, logs, errorMsg, onStart
         </div>
 
         {/* Content area */}
-        <div ref={feedRef} style={{ flex: 1, overflow: 'auto', padding: '14px 16px', maxHeight: 520 }}>
+        <div ref={feedRef} style={{ flex: 1, overflow: 'auto', padding: '14px 16px', maxHeight: '65vh' }}>
 
           {tab === 'bonds' && <BondsTable messages={messages} />}
           {tab === 'gas' && <GasTable key={session.id} messages={messages} />}
@@ -342,7 +342,7 @@ function MessageCard({ msg }) {
 
   return (
     <div
-      className="animate-fade-in"
+      className="animate-fade-in message-card"
       onClick={() => setExpanded(e => !e)}
       style={{
         border: `1px solid ${expanded ? 'var(--border-accent)' : 'var(--border)'}`,

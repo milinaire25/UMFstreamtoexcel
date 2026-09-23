@@ -1,9 +1,11 @@
-import React from 'react';
+import React, { lazy, Suspense } from 'react';
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { AuthProvider, useAuth } from './context/AuthContext';
 import LoginPage    from './pages/LoginPage';
 import DashboardPage from './pages/DashboardPage';
 import AdminPage    from './pages/AdminPage';
+
+const DesignPreview = import.meta.env.DEV ? lazy(() => import('./pages/DesignPreview')) : null;
 
 function PrivateRoute({ children }) {
   const { user, loading } = useAuth();
@@ -21,6 +23,7 @@ export default function App() {
     <AuthProvider>
       <BrowserRouter>
         <Routes>
+          {import.meta.env.DEV && <Route path="/design-preview" element={<Suspense fallback={<p>Loading preview…</p>}><DesignPreview /></Suspense>} />}
           <Route path="/login" element={<LoginPage />} />
           <Route path="/" element={<PrivateRoute><DashboardPage /></PrivateRoute>} />
           <Route path="/admin" element={<PrivateRoute><AdminRoute><AdminPage /></AdminRoute></PrivateRoute>} />

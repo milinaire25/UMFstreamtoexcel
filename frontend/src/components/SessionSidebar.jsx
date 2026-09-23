@@ -15,7 +15,7 @@ export default function SessionSidebar({ sessions, activeId, loading, messages, 
   const errors    = sessions.filter(s => s.status === 'error').length;
 
   return (
-    <div style={{ width: 240, flexShrink: 0, display: 'flex', flexDirection: 'column', gap: 10 }}>
+    <div className="session-sidebar">
 
       {/* Stats row */}
       <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8 }}>
