@@ -10,6 +10,7 @@ WORKDIR /frontend
 COPY frontend/package*.json ./
 RUN npm ci
 COPY frontend/ ./
+COPY shared/ /shared/
 RUN npm run build
 # Output: /frontend/dist
 
@@ -20,6 +21,7 @@ WORKDIR /excel-addin
 COPY excel-addin/package*.json ./
 RUN npm ci
 COPY excel-addin/ ./
+COPY shared/ /shared/
 RUN npm run build && cp manifest.render.xml dist/manifest.xml
 
 # ── Stage 3: production runtime (Node.js 20 + Java 17) ────────────────────────

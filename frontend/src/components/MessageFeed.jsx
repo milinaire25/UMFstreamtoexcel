@@ -1,3 +1,4 @@
+import { normalizeMessageText } from '../../../shared/messageText.mjs';
 import React, { useState, useRef, useEffect } from 'react';
 import BondsTable from './BondsTable';
 import GasTable from './GasTable';
@@ -353,7 +354,7 @@ function MessageCard({ msg }) {
     : new Date(msg._receivedAt || Date.now()).toLocaleTimeString('en-SG', { hour12: false, hour: '2-digit', minute: '2-digit', second: '2-digit' });
   const roomName = msg.additionalData?.chatRoomName || d.chatRoomId || '—';
   const userId   = msg.additionalData?.userId       || d.userUuid  || '—';
-  const text     = d.message || '—';
+  const text     = normalizeMessageText(d.message) || '—';
 
   return (
     <div

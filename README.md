@@ -461,3 +461,16 @@ Power accepts question-mark separators around the size suffix, such as
 `Q127 NSW 87.80/ ???in ?3`, as bid 87.80, no ask, size 3. These separators are handled
 without an extra label under the contract. The original message remains in hover text.
 Markers inside prices or between digits are not silently removed.
+
+
+### Shared UMF quote text normalization
+
+Feed display, Bonds, GAS, Gas Bulletin, Power, and Excel's Message column use
+`shared/messageText.mjs`. For recognized market lines it normalizes nonbreaking
+spaces and question-mark separators before tokens, including `???in ?3`.
+Ordinary conversation, trailing question marks, and ambiguous marks inside
+numbers remain intact; GAS still flags a trailing question mark as unconfirmed.
+The original event, Raw JSON, replay identity, and stored history are unchanged.
+This is conservative handling of observed payload artifacts, not a blanket
+replacement of every question mark or a confirmed fix in the proprietary UMF JAR.
+Both Docker build stages copy the shared helper; local Vite servers allow its import.

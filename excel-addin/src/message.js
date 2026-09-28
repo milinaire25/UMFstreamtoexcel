@@ -1,3 +1,5 @@
+import { normalizeMessageText } from '../../shared/messageText.mjs';
+
 export const TABLE_NAME = 'UMFFeedMessages';
 export const SHEET_NAME = 'UMF Feed';
 
@@ -23,7 +25,7 @@ export function messageToRow(message, receivedAt = new Date().toISOString()) {
     eventData.createAt || message?._receivedAt || '',
     additionalData.chatRoomName || eventData.chatRoomId || '',
     additionalData.userId || eventData.userUuid || '',
-    eventData.message || '',
+    normalizeMessageText(eventData.message),
     attachments,
     JSON.stringify(message || {}),
   ];

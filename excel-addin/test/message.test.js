@@ -60,3 +60,12 @@ test('normalizeWebSocketUrl keeps the backend WebSocket path stable', () => {
     'wss://umfstreamtoexcel.onrender.com/ws',
   );
 });
+
+test('Excel cleans quote separators only in Message and preserves exact Raw JSON', () => {
+  const message = {eventData:{message:'Q127 NSW 87.80/ ???in ?3'}};
+  const raw = JSON.stringify(message);
+  const row = messageToRow(message);
+  assert.equal(row[4], 'Q127 NSW 87.80/ in 3');
+  assert.equal(row[6], raw);
+  assert.equal(JSON.stringify(message), raw);
+});

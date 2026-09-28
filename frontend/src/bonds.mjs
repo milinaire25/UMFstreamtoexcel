@@ -1,8 +1,10 @@
+import { normalizeMessageText } from '../../shared/messageText.mjs';
+
 // Supported quote: 7.63% NCD Google bond MD 20/08/2028 8.60 offer.
 // Require explicit fields rather than treating ordinary chat as a bond quote.
 export function parseBondQuote(text) {
   if (typeof text !== 'string') return null;
-  const match = text.trim().match(/^(\d+(?:\.\d+)?)\s*%\s+(NCD|CD|CP|BOND|DEBENTURE)\s+(.+?)\s+(?:MD|maturity(?:\s+date)?)\s*:?\s*(\d{1,2})[\/-](\d{1,2})[\/-](\d{4})(?:\s+(.+?))?\s*$/i);
+  const match = normalizeMessageText(text).trim().match(/^(\d+(?:\.\d+)?)\s*%\s+(NCD|CD|CP|BOND|DEBENTURE)\s+(.+?)\s+(?:MD|maturity(?:\s+date)?)\s*:?\s*(\d{1,2})[\/-](\d{1,2})[\/-](\d{4})(?:\s+(.+?))?\s*$/i);
   if (!match) return null;
   const [, coupon, instrument, rawIssuer, day, month, year, tail = ''] = match;
   const date = new Date(`${year}-${month.padStart(2, '0')}-${day.padStart(2, '0')}T00:00:00Z`);

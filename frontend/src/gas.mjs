@@ -1,3 +1,5 @@
+import { normalizeMessageText } from '../../shared/messageText.mjs';
+
 const MONTHS = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
 const PERIOD = '(Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec|Q[1-4]|Sum|Win|Cal)';
 const QUOTE = new RegExp(`^(?:(TTF|NBP)\\s+)?${PERIOD}(?:[- ]?(\\d{4}|\\d{2}))?\\s+([0-9]+(?:\\.[0-9]+)?)\\s*/\\s*([0-9]+(?:\\.[0-9]+)?)(?:\\s+(\\d+(?:\\.\\d+)?)\\s*mw)?$`, 'i');
@@ -42,7 +44,7 @@ export function parseGasMessage(message, { defaultProduct = 'TTF', inferYears = 
   if (!sender) return [];
   const room = data.chatRoomId || message.additionalData?.chatRoomName || 'Unspecified room';
   const roomName = message.additionalData?.chatRoomName || room;
-  const lines = data.message.split(/\r?\n/).map(line => line.trim()).filter(Boolean);
+  const lines = normalizeMessageText(data.message).split(/\r?\n/).map(line => line.trim()).filter(Boolean);
   const sizes = {};
   for (const line of lines) {
     // Only parse standalone size lines; never mistake a price for a size.

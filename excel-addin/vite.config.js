@@ -5,6 +5,7 @@ const renderTarget = 'https://umfstreamtoexcel.onrender.com';
 export default defineConfig({
   base: './',
   server: {
+    fs: { allow: ['..'] },
     host: '127.0.0.1',
     port: 5174,
     proxy: {

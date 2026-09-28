@@ -1,7 +1,9 @@
+import { normalizeMessageText } from '../../shared/messageText.mjs';
+
 // Power quotes are message history, never a merged best-market book.
 export function parsePowerLine(source) {
   if (/\b30\s*p\b/i.test(source)) return null;
-  const head = source.trim().match(/^(FY\s*\d{2}|CAL\s*\d{2}|Q\s*[1-4]\s*\d{2})\s+(VIC|NSW|QLD)\s*:?\s*(.*)$/i);
+  const head = normalizeMessageText(source).trim().match(/^(FY\s*\d{2}|CAL\s*\d{2}|Q\s*[1-4]\s*\d{2})\s+(VIC|NSW|QLD)\s*:?\s*(.*)$/i);
   if (!head) return null;
   const contract = `${head[1].replace(/\s/g, '').toUpperCase()} ${head[2].toUpperCase()}`;
   let body = head[3];
@@ -21,7 +23,7 @@ export function parsePowerLine(source) {
   if (!suffix) return null;
   const size = suffix[1] || null;
   const block = Boolean(suffix[2]);
-  return { contract, bid, ask, size, block, hasQuestionMarks: tail.includes('?'), time: timeMatch?.[1] || null, source };
+  return { contract, bid, ask, size, block, hasQuestionMarks: /[?？]/.test(source), time: timeMatch?.[1] || null, source };
 }
 
 export function powerRows(messages) {
