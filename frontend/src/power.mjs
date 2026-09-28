@@ -9,17 +9,19 @@ export function parsePowerLine(source) {
   if (timeMatch) body = body.slice(0, timeMatch.index).trim();
   // Broker shorthand: a spaced trailing integer after a bid-only slash is size.
   body = body.replace(/^(\d+(?:\.\d+)?)\/\s+(\d+)$/, '$1/ in $2');
-  const quote = body.match(/^(\d+(?:\.\d+)?)?\s*\/\s*(\d+(?:\.\d+)?)?(?=\s|$)/);
+  const quote = body.match(/^(\d+(?:\.\d+)?)?\s*\/\s*(\d+(?:\.\d+)?)?(?=[?\s]|$)/);
   if (!quote || (!quote[1] && !quote[2])) return null;
   const bid = quote[1] ? Number(quote[1]) : null;
   const ask = quote[2] ? Number(quote[2]) : null;
   const tail = body.slice(quote[0].length).trim();
   // Only flat quote suffixes are allowed: never read option strikes as prices.
-  const suffix = tail.match(/^(?:(?:in\s+)?(\d+(?:\.\d+)?)\s*)?(?:(?:in\s+)?(blk|block))?$/i);
+  // UMF may deliver markers such as `???in ?3`. Treat these as separators
+  // only in the size suffix; never remove markers inside prices or join digits.
+  const suffix = tail.replace(/\?+/g, ' ').trim().match(/^(?:(?:in\s+)?(\d+(?:\.\d+)?)\s*)?(?:(?:in\s+)?(blk|block))?$/i);
   if (!suffix) return null;
   const size = suffix[1] || null;
   const block = Boolean(suffix[2]);
-  return { contract, bid, ask, size, block, time: timeMatch?.[1] || null, source };
+  return { contract, bid, ask, size, block, hasQuestionMarks: tail.includes('?'), time: timeMatch?.[1] || null, source };
 }
 
 export function powerRows(messages) {

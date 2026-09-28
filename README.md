@@ -456,3 +456,8 @@ time. Sorting and expiry always use receipt metadata, not the embedded clock.
 Run `npm test --prefix frontend` for sample-message and independent-row tests.
 For local review, run `npm run dev --prefix frontend` and open `/design-preview`,
 select Power, and use **Simulate Power quote** to append an ask-only message.
+
+Power accepts question-mark separators around the size suffix, such as
+`Q127 NSW 87.80/ ???in ?3`, as bid 87.80, no ask, size 3. The row is labeled
+“Contains ? markers” and preserves the original message in its hover text.
+Markers inside prices or between digits are not silently removed.

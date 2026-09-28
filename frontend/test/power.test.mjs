@@ -54,3 +54,31 @@ test('multiline quotes survive until three-minute receipt expiry without changin
   assert.equal(powerRows(recentMessages([old,fresh],180999)).length,3);
   assert.equal(powerRows(recentMessages([old,fresh],181000)).length,2);
 });
+
+
+test('real UMF question-mark formatting parses a bid-only quote without inventing an ask', () => {
+  const payload = {
+    eventData: { message: 'Q127 NSW 87.80/ ???in ?3', createAt: '2026-09-28T07:48:07.687Z' },
+    additionalData: { userId: 'sender@example.com' },
+    _receivedAt: '2026-09-28T07:48:07.816Z',
+  };
+  const [row] = powerRows(recentMessages([payload], Date.parse('2026-09-28T07:48:08Z')));
+  assert.ok(row);
+  assert.deepEqual([row.contract, row.bid, row.ask, row.size, row.hasQuestionMarks], ['Q127 NSW', 87.8, null, '3', true]);
+  assert.equal(row.source, payload.eventData.message);
+  assert.equal(payload.eventData.message, 'Q127 NSW 87.80/ ???in ?3');
+});
+
+test('question marks are accepted around size terms but never joined into numbers or option prices', () => {
+  for (const text of ['Fy 29 vic 82.75/ ???in ?3', 'Q127 NSW 87.80/???in ?3', 'Q127 NSW 87.80/ in 3?']) {
+    const row = parsePowerLine(text);
+    assert.ok(row, text);
+    assert.equal(row.ask, null);
+    assert.equal(row.size, '3');
+    assert.equal(row.hasQuestionMarks, true);
+  }
+  for (const text of ['Q127 NSW 87.?80/ in 3', 'Q127 NSW 87.80/ in 3?5', 'Q127 NSW 87.80/ ?88 in 3', 'Q426 VIC 30p 1.10/1.50 ???blk', 'Q127 QLD 75/65 ?PS 3.25/ blk']) {
+    assert.equal(parsePowerLine(text), null, text);
+  }
+  assert.equal(parsePowerLine('Q127 NSW 87.80/ in 3').hasQuestionMarks, false);
+});

@@ -10,7 +10,7 @@ export default function PowerTable({ messages }) {
     <table className="bonds-table power-table" aria-label="Power quote history">
       <thead><tr>{['Contract', 'Bid', 'Ask', 'Size', 'Time', 'Sender email'].map(label => <th key={label} scope="col">{label}</th>)}</tr></thead>
       <tbody>{rows.map(row => <tr key={row.key} title={row.source}>
-        <td className="power-contract"><strong>{row.contract}</strong></td>
+        <td className="power-contract"><strong>{row.contract}</strong>{row.hasQuestionMarks && <small className="gas-unconfirmed" title="Original message contains question marks; hover the row to inspect the source">Contains ? markers</small>}</td>
         <td className="bonds-price">{price(row.bid)}</td><td className="bonds-price">{price(row.ask)}</td>
         <td>{row.size || (row.block ? 'Block' : '—')}{row.size && row.block && <small className="gas-assumption">Block</small>}</td>
         <td title={row.time ? 'Time supplied in message text' : 'UMF message receipt time'}>{row.time || (row.timestamp ? new Date(row.timestamp).toLocaleTimeString('en-GB', { hour12: false }) : '—')}</td>
