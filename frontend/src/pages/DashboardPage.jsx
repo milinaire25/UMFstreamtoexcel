@@ -125,7 +125,7 @@ export default function DashboardPage() {
     <div style={{ display: 'flex', flexDirection: 'column', minHeight: '100vh', background: 'var(--bg)' }}>
       <Topbar user={user} onLogout={() => { logout(); nav('/login'); }} isAdmin={user?.role === 'admin'} />
 
-      <div className="workspace-heading"><div><span className="eyebrow">YOUR MARKET, IN CONTEXT</span><h1>Message workspace<span>.</span></h1></div><p>Conversations. Quotes. One clear view.</p></div>
+      <div className="workspace-heading"><div><span className="eyebrow">YOUR MARKET, IN CONTEXT</span><h1>Message Feed View<span>.</span></h1></div><p>Conversations. Quotes. One clear view.</p></div>
       <div className="workspace-layout">
         <SessionSidebar
           sessions={sessions}

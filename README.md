@@ -446,8 +446,7 @@ earlier quotes. It shares the display-only three-minute expiry.
 
 Supported periods are FY, CAL, and Q1–Q4 with explicit two-digit years; regions
 are VIC, NSW, and QLD. Only flat contracts are supported in this release.
-Options, CS/PS spreads, ratios, and `30p` messages are excluded. A separate
-Power options tab is deferred to a future release. `blk` and `block` do not
+Options, CS/PS spreads, ratios, and `30p` messages are excluded. Power options are handled in the separate Power Options tab. `blk` and `block` do not
 imply a numeric size. In the supplied shorthand `76.50/ 3`, the spaced trailing
 integer is treated as size; write `in 3` to make this explicit.
 
@@ -474,3 +473,17 @@ The original event, Raw JSON, replay identity, and stored history are unchanged.
 This is conservative handling of observed payload artifacts, not a blanket
 replacement of every question mark or a confirmed fix in the proprietary UMF JAR.
 Both Docker build stages copy the shared helper; local Vite servers allow its import.
+
+
+## Power Options tab
+
+The separate Power Options tab displays Contract, Product, Bid, Ask, Size,
+Structure, and Sender email. It accepts explicit CS, PS and Ratio CS spreads,
+retaining strikes and ratios in Structure and hedge details beneath it.
+`25:50` remains leg sizes; `blk`/`block` remain Block without an inferred quantity.
+Each message stays separate, newest first, with the shared three-minute expiry.
+Flat quotes remain in Power; unsupported single-strike options remain excluded.
+
+Open `/design-preview?tab=power-options` locally for the supplied examples using
+fictional sender emails. **Replay options samples** adds fresh sample rows after
+expiry. This preview does not connect to UMF.

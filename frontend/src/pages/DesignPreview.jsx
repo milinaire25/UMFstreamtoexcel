@@ -4,6 +4,7 @@ import Topbar from '../components/Topbar';
 import SessionSidebar from '../components/SessionSidebar';
 import MessageFeed from '../components/MessageFeed';
 import SessionForm from '../components/SessionForm';
+import { sampleOptionMessages } from './powerOptionSamples.mjs';
 
 export default function DesignPreview() {
   const [status, setStatus] = useState('running');
@@ -18,16 +19,16 @@ export default function DesignPreview() {
       ['sam@broker.example', 'cal 29 qld /84.05 in 2 10:22:10\nQ426 QLD 68.25/68.90 in 10 10:23:10', 20000],
       ['alex@broker.example', 'Q4 27 Vic 43.25/ in 5', 1000],
       ['sam@broker.example', '5.20% NCD Microsoft bond MD 15/06/2029 5.45 offer', 4000],
-    ].map(([sender, message, age]) => ({ eventData: { message, createAt: new Date(base-age).toISOString(), chatRoomId: 'sample-room' }, additionalData: { userId: sender, chatRoomName: 'Market conversations' } }));
+    ].map(([sender, message, age]) => ({ eventData: { message, createAt: new Date(base-age).toISOString(), chatRoomId: 'sample-room' }, additionalData: { userId: sender, chatRoomName: 'Market conversations' } })).concat(sampleOptionMessages(base));
   });
   const session = { id: 'preview', serviceAccount: 'Market desk · Preview', status, env: 'prod', trackEmail: 'trader@example.com' };
   return <>
-    <div className="preview-banner"><strong>LOCAL DESIGN PREVIEW</strong><span>Sample data · No LSEG connection</span><Link to="/login">View sign-in page ↗</Link><button className="sm" onClick={() => setMessages(old => [...old, { eventData: {message:'TTF Nov 26 32.40/48 20mw',createAt:new Date().toISOString()}, additionalData:{userId:'sam@broker.example',chatRoomName:'Market conversations'} }])}>Simulate a message</button><button className="sm" onClick={() => setMessages(old => [...old, {eventData:{message:"Q4 27 Vic /44.00 in 5",createAt:new Date().toISOString()},additionalData:{userId:"alex@broker.example"}}])}>Simulate Power quote</button></div>
+    <div className="preview-banner"><strong>LOCAL DESIGN PREVIEW</strong><span>Sample data · No LSEG connection</span><Link to="/login">View sign-in page ↗</Link><button className="sm" onClick={() => setMessages(old => [...old, { eventData: {message:'TTF Nov 26 32.40/48 20mw',createAt:new Date().toISOString()}, additionalData:{userId:'sam@broker.example',chatRoomName:'Market conversations'} }])}>Simulate a message</button><button className="sm" onClick={() => setMessages(old => [...old, {eventData:{message:"Q4 27 Vic /44.00 in 5",createAt:new Date().toISOString()},additionalData:{userId:"alex@broker.example"}}])}>Simulate Power quote</button><button className="sm" onClick={() => setMessages(old => [...old, ...sampleOptionMessages()])}>Replay options samples</button></div>
     <Topbar user={{name:'Milind'}} onLogout={() => { window.location.href='/login'; }} />
-    <div className="workspace-heading"><div><span className="eyebrow">YOUR MARKET, IN CONTEXT</span><h1>Message workspace<span>.</span></h1></div><p>Conversations. Quotes. One clear view.</p></div>
+    <div className="workspace-heading"><div><span className="eyebrow">YOUR MARKET, IN CONTEXT</span><h1>Message Feed View<span>.</span></h1></div><p>Conversations. Quotes. One clear view.</p></div>
     <div className="workspace-layout">
       <SessionSidebar sessions={[session]} activeId="preview" loading={false} messages={{preview:messages}} onSelect={()=>{}} onAdd={()=>setShowForm(true)} onStart={()=>setStatus('running')} onStop={()=>setStatus('stopped')} onDelete={()=>setMessages([])} />
-      <div style={{flex:1,minWidth:0}}><MessageFeed session={session} messages={messages} logs={['Preview ready. Sample messages loaded.']} onStart={()=>setStatus('running')} onStop={()=>setStatus('stopped')} /></div>
+      <div style={{flex:1,minWidth:0}}><MessageFeed initialTab={new URLSearchParams(window.location.search).get("tab") || "feed"} session={session} messages={messages} logs={['Preview ready. Sample messages loaded.']} onStart={()=>setStatus('running')} onStop={()=>setStatus('stopped')} /></div>
     </div>
     {showForm && <SessionForm onClose={()=>setShowForm(false)} onSubmit={async ()=>setShowForm(false)} />}
   </>;

@@ -4,9 +4,10 @@ import BondsTable from './BondsTable';
 import GasTable from './GasTable';
 import GasBulletin from './GasBulletin';
 import PowerTable from './PowerTable';
+import PowerOptionsTable from './PowerOptionsTable';
 import { recentMessages } from '../recentMessages.mjs';
 
-const TABS = ['feed', 'bonds', 'gas', 'gas-bulletin', 'power', 'json', 'logs', 'command'];
+const TABS = ['feed', 'bonds', 'gas', 'gas-bulletin', 'power', 'power-options', 'json', 'logs', 'command'];
 
 const STATUS_STYLE = {
   stopping:   { color: 'var(--amber)', bg: 'var(--amber-bg)', label: 'Stopping…' },
@@ -16,8 +17,8 @@ const STATUS_STYLE = {
   error:      { color: 'var(--red)',    bg: 'var(--red-bg)',    label: 'Error' },
 };
 
-export default function MessageFeed({ session, messages, logs, errorMsg, onStart, onStop }) {
-  const [tab,        setTab]        = useState('feed');
+export default function MessageFeed({ session, messages, logs, errorMsg, onStart, onStop, initialTab = 'feed' }) {
+  const [tab,        setTab]        = useState(TABS.includes(initialTab) ? initialTab : 'feed');
   const [filter,     setFilter]     = useState('');
   const [autoScroll, setAutoScroll] = useState(true);
   const feedRef = useRef(null);
@@ -34,7 +35,7 @@ export default function MessageFeed({ session, messages, logs, errorMsg, onStart
   const visibleMessages = recentMessages(messages, now);
 
   useEffect(() => {
-    if (['bonds', 'power'].includes(tab) && feedRef.current) {
+    if (['bonds', 'power', 'power-options'].includes(tab) && feedRef.current) {
       feedRef.current.scrollTop = 0;
     } else if (!['gas', 'gas-bulletin'].includes(tab) && autoScroll && feedRef.current) {
       feedRef.current.scrollTop = feedRef.current.scrollHeight;
@@ -199,6 +200,7 @@ export default function MessageFeed({ session, messages, logs, errorMsg, onStart
                         : t === 'bonds'  ? 'Bonds'
                         : t === 'gas'    ? 'GAS'
                         : t === 'power' ? 'Power'
+                        : t === 'power-options' ? 'Power Options'
                         : t === 'gas-bulletin' ? 'Gas Bulletin board'
                         : t === 'logs'   ? `Logs${logs.length > 0 ? `  (${logs.length})` : ''}`
                         : t === 'json'   ? 'Raw JSON'
@@ -242,6 +244,7 @@ export default function MessageFeed({ session, messages, logs, errorMsg, onStart
         {/* Content area */}
         <div ref={feedRef} style={{ flex: 1, overflow: 'auto', padding: '14px 16px', maxHeight: '65vh' }}>
 
+          {tab === 'power-options' && <PowerOptionsTable messages={visibleMessages} />}
           {tab === 'power' && <PowerTable messages={visibleMessages} />}
           {tab === 'bonds' && <BondsTable messages={visibleMessages} />}
           {tab === 'gas' && <GasTable key={session.id} messages={visibleMessages} />}
