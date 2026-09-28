@@ -359,3 +359,5 @@ input[type=checkbox] { min-height: 0; accent-color: var(--accent); }
 .admin-layout { padding: 36px 24px; max-width: 1000px; margin: 0 auto; width: 100%; }
 .admin-user-form { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; }
 @media (max-width: 600px) { .admin-user-form { grid-template-columns: 1fr; } .admin-layout { padding: 24px 18px; overflow-x: auto; } }
+
+.power-table .power-contract { white-space: normal; min-width: 210px; }

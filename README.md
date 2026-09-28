@@ -425,14 +425,34 @@ and inspect the Java logs instead of repeatedly restarting.
 
 ## Three-minute demo display
 
-Feed, Bonds, GAS, and Gas Bulletin board display only messages received by the
+Feed, Bonds, GAS, Gas Bulletin board, and Power display only messages received by the
 backend within the last three minutes. A one-second UI clock clears expired
 rows even without new messages; returning to the tab refreshes the clock.
 GAS best bid/ask is recalculated from the remaining recent messages.
 Reconnect replay retains the original server receipt timestamp, so old messages
 do not reappear. A newly sent message, even with identical text, appears again.
 Creation time is used only when server receipt time is unavailable; messages
-without either valid timestamp are excluded from these four views.
+without either valid timestamp are excluded from these views.
 
 This is a display filter: backend buffers, Raw JSON, logs, and Excel worksheet
 rows are not deleted. Sidebar totals still represent buffered message counts.
+
+
+## Power dashboard tab
+
+Power shows a separate row for every parsed quote, newest receipt first, with
+Contract, Bid, Ask, Size, Time, and Sender email. One-sided messages never modify
+earlier quotes. It shares the display-only three-minute expiry.
+
+Supported periods are FY, CAL, and Q1–Q4 with explicit two-digit years; regions
+are VIC, NSW, and QLD. Only flat contracts are supported in this release.
+Options, CS/PS spreads, ratios, and `30p` messages are excluded. A separate
+Power options tab is deferred to a future release. `blk` and `block` do not
+imply a numeric size. In the supplied shorthand `76.50/ 3`, the spaced trailing
+integer is treated as size; write `in 3` to make this explicit.
+
+Time uses a trailing HH:MM:SS from the text when present, otherwise UMF receipt
+time. Sorting and expiry always use receipt metadata, not the embedded clock.
+Run `npm test --prefix frontend` for sample-message and independent-row tests.
+For local review, run `npm run dev --prefix frontend` and open `/design-preview`,
+select Power, and use **Simulate Power quote** to append an ask-only message.
