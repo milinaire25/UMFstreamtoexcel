@@ -362,4 +362,4 @@ input[type=checkbox] { min-height: 0; accent-color: var(--accent); }
 
 .power-table .power-contract { white-space: normal; min-width: 210px; }
 
-.power-options-table .power-option-structure { white-space: normal; min-width: 220px; }
+.power-options-table .power-option-notes { white-space: normal; min-width: 220px; }

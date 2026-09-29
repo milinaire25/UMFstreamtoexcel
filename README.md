@@ -477,10 +477,11 @@ Both Docker build stages copy the shared helper; local Vite servers allow its im
 
 ## Power Options tab
 
-The separate Power Options tab displays Contract, Product, Bid, Ask, Size,
-Structure, and Sender email. It accepts explicit CS, PS and Ratio CS spreads,
-retaining strikes and ratios in Structure and hedge details beneath it.
-`25:50` remains leg sizes; `blk`/`block` remain Block without an inferred quantity.
+The separate Power Options tab displays Contract, Strike Price, Structure, Bid, Ask, Size, Notes, and Sender email. It accepts explicit CS, PS and Ratio CS spreads,
+Contract includes period and region. Strike Price contains the strike pair;
+Structure shows CS, PS or Ratio CS, with any ratio beneath it.
+`25:50` remains leg sizes; `blk`/`block` appear as BLK in Notes alongside hedge
+details. Missing bid, ask and size cells stay blank.
 Each message stays separate, newest first, with the shared three-minute expiry.
 Flat quotes remain in Power; unsupported single-strike options remain excluded.
 

@@ -13,16 +13,18 @@ export function parsePowerOption(source) {
   const tail = body.slice(quote[0].length).trim();
   const suffix = tail.match(/^(?:(?:in\s+)?(block|blk|\d+(?:\.\d+)?(?:\s*:\s*\d+(?:\.\d+)?)?))?(?:\s+(.*))?$/i);
   if (!suffix) return null;
-  const size = suffix[1] ? /^(block|blk)$/i.test(suffix[1]) ? 'Block' : suffix[1].replace(/\s/g, '') : null;
+  const block = /^(block|blk)$/i.test(suffix[1] || '');
+  const size = suffix[1] && !block ? suffix[1].replace(/\s/g, '') : null;
   const notes = suffix[2] || '';
   // Hedge details are retained separately; their numbers never become premiums or size.
   if (notes && !/^(?:x\s+\d+(?:\.\d+)?\s+at\s+\d+(?:\.\d+)?|\(naked\s+bid\s*\/\s*x\s+\d+(?:\.\d+)?\s+at\s+\d+(?:\.\d+)?\))$/i.test(notes)) return null;
   return {
-    contract: period.replace(/\s/g, '').toUpperCase(), product: region.toUpperCase(),
+    contract: `${period.replace(/\s/g, '').toUpperCase()} ${region.toUpperCase()}`, product: region.toUpperCase(),
     bid: quote[1] ? Number(quote[1]) : null, ask: quote[2] ? Number(quote[2]) : null,
     size, strikes: strikes.replace(/\s/g, ''),
-    structure: /^RATIO/i.test(kind) ? `${ratio.replace(/\s/g, '')} Ratio CS` : kind.toUpperCase(),
-    notes, source,
+    structure: /^RATIO/i.test(kind) ? 'Ratio CS' : kind.toUpperCase(),
+    ratio: ratio ? ratio.replace(/\s/g, '') : null,
+    notes: [block ? 'BLK' : '', notes].filter(Boolean).join(' · '), source,
   };
 }
 
