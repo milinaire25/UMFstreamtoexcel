@@ -515,3 +515,11 @@ messaging apps). Both capture currently displayed rates, retain blank cells,
 and preserve numeric percentage units. If clipboard access is blocked, a selectable
 text fallback is shown. Export/copy are disabled when there are no visible rates.
 Excel export code is loaded on demand, leaving other tabs' startup bundle small.
+
+Money Market also accepts a complete multi-bank grid in one message, either a
+Markdown pipe table or tab-separated text copied from Excel / **Copy table**.
+Include `Currency / Tenor` with `SGD (rates %)` (or `SGD`) and a `Tenor` header
+with explicit Bank 1–4 columns. Column order is read from the header. Empty cells
+stay unquoted and never shift adjacent rates; malformed rows and ambiguous bank
+headers are rejected. Per-bank messages and combined tables share the same latest
+rate per bank/tenor logic, receipt expiry, copy and Excel export behavior.

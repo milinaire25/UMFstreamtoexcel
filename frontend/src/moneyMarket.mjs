@@ -1,3 +1,5 @@
+import {parseMoneyMarketTable} from './moneyMarketTableParser.mjs';
+
 export const MONEY_MARKET_TENORS = ['O/N', '1W', '2W', '3W', ...Array.from({length:11}, (_, i) => `${i+1}M`), '1Y'];
 
 // Scoped to money-market messages so other market parsers stay unchanged.
@@ -9,6 +11,12 @@ function cleanLine(line) {
 export function parseMoneyMarket(message) {
   const data = message.eventData || message;
   if (typeof data.message !== 'string') return [];
+  const created = Date.parse(data.createAt);
+  const received = Date.parse(message._receivedAt);
+  const timestamp = Number.isFinite(created) ? created : Number.isFinite(received) ? received : 0;
+  const sender = message.additionalData?.userId || data.userUuid || '';
+  const tableQuotes = parseMoneyMarketTable(data.message, MONEY_MARKET_TENORS);
+  if (tableQuotes !== null) return tableQuotes.map(quote => ({...quote,timestamp,sender,source:data.message}));
   const lines = data.message.split(/\r\n?|\n/).map(cleanLine).filter(Boolean);
   const banks = lines.filter(line => /^BANK\s*:/i.test(line));
   const currencies = lines.filter(line => /^(?:TENOR|CURRENCY)\b/i.test(line));
@@ -17,10 +25,6 @@ export function parseMoneyMarket(message) {
   const bank = banks[0].match(/^BANK\s*:\s*(?:Provider|Bank)\s*([1-4])$/i);
   const currency = currencies[0].match(/^(?:TENOR|CURRENCY)\s*:?\s*SGD$/i);
   if (!bank || !currency) return [];
-  const created = Date.parse(data.createAt);
-  const received = Date.parse(message._receivedAt);
-  const timestamp = Number.isFinite(created) ? created : Number.isFinite(received) ? received : 0;
-  const sender = message.additionalData?.userId || data.userUuid || '';
   const rates = new Map();
   for (const line of lines) {
     const match = line.match(/^(O\/?N|(?:[1-9]|1[01])\s*(?:-\s*)?(?:Weeks?|W|Months?|M|Years?|Y))\s+(-?\d+(?:\.\d+)?)\s*%?$/i);
