@@ -508,3 +508,10 @@ are never silently joined into a rate.
 
 Local preview: `/design-preview?tab=money-market`. Replay Money Market sample
 loads the exact Provider2 screenshot values; no rates are invented for other banks.
+
+Money Market offers **Export to Excel** (a real `.xlsx` workbook with a filterable
+Excel table) and **Copy table** (HTML plus tab-separated plain text for Excel and
+messaging apps). Both capture currently displayed rates, retain blank cells,
+and preserve numeric percentage units. If clipboard access is blocked, a selectable
+text fallback is shown. Export/copy are disabled when there are no visible rates.
+Excel export code is loaded on demand, leaving other tabs' startup bundle small.

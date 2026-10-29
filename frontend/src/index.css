@@ -366,5 +366,9 @@ input[type=checkbox] { min-height: 0; accent-color: var(--accent); }
 
 .money-market-currency { display:flex; align-items:center; gap:24px; font-size:14px; color:var(--text-2); margin:4px 0 12px; }
 .money-market-currency span { color:var(--accent-dk); font-size:20px; font-weight:700; }
-.money-market-table { min-width:480px; }
+.money-market-table { width:auto; min-width:0; }
+.money-market-table th, .money-market-table td { padding:7px 12px; min-width:72px; }
+.money-market-actions { display:flex; align-items:center; flex-wrap:wrap; gap:8px; margin-bottom:14px; }
+.money-market-actions [role="status"] { font-size:12px; color:var(--text-2); }
+.money-market-copy { width:100%; min-height:180px; margin-bottom:12px; font-family:monospace; }
 .money-market-table th:not(:first-child), .money-market-table td:not(:first-child) { text-align:right; }
