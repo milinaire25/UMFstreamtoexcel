@@ -488,3 +488,23 @@ Flat quotes remain in Power; unsupported single-strike options remain excluded.
 Open `/design-preview?tab=power-options` locally for the supplied examples using
 fictional sender emails. **Replay options samples** adds fresh sample rows after
 expiry. This preview does not connect to UMF.
+
+## Money Market tab
+
+SGD Money Market displays O/N, 1W–3W, 1M–11M and 1Y against four bank columns.
+Each message must identify `BANK: Provider1` through `Provider4` (or Bank1–Bank4)
+and `TENOR SGD` (or `CURRENCY SGD`). Bank names map explicitly to their numbered
+columns; sender email is retained in the cell tooltip, not used to guess a bank.
+Tenors accept `ON`, `O/N`, `1-Week`, `1-Month`, `1-Year` and short W/M/Y forms.
+Rates retain percentage units: 1.22% is displayed as 1.22, not 0.0122.
+
+Latest message time wins per bank/tenor. Partial updates keep other cells;
+unknown banks/currencies, malformed rates and conflicting duplicate headers or
+tenors are rejected. Missing rates stay blank. The existing three-minute receipt
+expiry clears expired cells without deleting Raw JSON, history or Excel data.
+UMF question-mark separators and nonbreaking spaces are handled within this
+parser, without altering existing market parsers. Ordinary numeric question marks
+are never silently joined into a rate.
+
+Local preview: `/design-preview?tab=money-market`. Replay Money Market sample
+loads the exact Provider2 screenshot values; no rates are invented for other banks.

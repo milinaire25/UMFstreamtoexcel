@@ -363,3 +363,8 @@ input[type=checkbox] { min-height: 0; accent-color: var(--accent); }
 .power-table .power-contract { white-space: normal; min-width: 210px; }
 
 .power-options-table .power-option-notes { white-space: normal; min-width: 220px; }
+
+.money-market-currency { display:flex; align-items:center; gap:24px; font-size:14px; color:var(--text-2); margin:4px 0 12px; }
+.money-market-currency span { color:var(--accent-dk); font-size:20px; font-weight:700; }
+.money-market-table { min-width:480px; }
+.money-market-table th:not(:first-child), .money-market-table td:not(:first-child) { text-align:right; }
