@@ -18,6 +18,27 @@ export function parseMoneyMarket(message) {
   const tableQuotes = parseMoneyMarketTable(data.message, MONEY_MARKET_TENORS);
   if (tableQuotes !== null) return tableQuotes.map(quote => ({...quote,timestamp,sender,source:data.message}));
   const lines = data.message.split(/\r\n?|\n/).map(cleanLine).filter(Boolean);
+  const starts = lines.flatMap((line,index) => /^BANK\s*:/i.test(line) ? [index] : []);
+  // Each bank section must declare its own currency. Never carry bank/currency
+  // state from an earlier section into a later section.
+  if (starts.length > 1 && starts[0] !== 0) return [];
+  const sections = starts.length > 1
+    ? starts.map((start,index) => lines.slice(start,starts[index+1] ?? lines.length))
+    : [lines];
+  const combined = new Map();
+  for (const section of sections) {
+    const quotes = parseBankSection(section);
+    if (!quotes.length) return [];
+    for (const quote of quotes) {
+      const key = `${quote.bank}:${quote.tenor}`;
+      if (combined.has(key) && combined.get(key).rate !== quote.rate) return [];
+      combined.set(key, quote);
+    }
+  }
+  return [...combined.values()].map(quote => ({...quote,timestamp,sender,source:data.message}));
+}
+
+function parseBankSection(lines) {
   const banks = lines.filter(line => /^BANK\s*:/i.test(line));
   const currencies = lines.filter(line => /^(?:TENOR|CURRENCY)\b/i.test(line));
   // Require an explicit, unambiguous bank and currency; never infer them from sender order.
@@ -42,7 +63,7 @@ export function parseMoneyMarket(message) {
     if (rates.has(tenor) && rates.get(tenor) !== rate) return [];
     rates.set(tenor, rate);
   }
-  return [...rates].map(([tenor, rate]) => ({bank:Number(bank[1]), currency:'SGD', tenor, rate, timestamp, sender, source:data.message}));
+  return [...rates].map(([tenor, rate]) => ({bank:Number(bank[1]), currency:'SGD', tenor, rate}));
 }
 
 export function moneyMarketRows(messages) {

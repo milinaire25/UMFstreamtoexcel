@@ -523,3 +523,9 @@ with explicit Bank 1–4 columns. Column order is read from the header. Empty ce
 stay unquoted and never shift adjacent rates; malformed rows and ambiguous bank
 headers are rejected. Per-bank messages and combined tables share the same latest
 rate per bank/tenor logic, receipt expiry, copy and Excel export behavior.
+
+A single Money Market message may also contain consecutive bank sections:
+`BANK: Provider1`, `TENOR SGD`, rates, then `BANK: Provider2`, `TENOR SGD`, rates,
+and so on. Every section must declare its own bank and currency. Section order
+does not determine the output column. Ambiguous or unsupported sections reject
+the combined payload rather than allowing rates to leak into a preceding bank.
